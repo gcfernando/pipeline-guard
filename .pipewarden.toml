@@ -4,6 +4,6 @@ docker = false  # no docker daemon in our test env
 vulns  = false  # we don't ship lockfiles here
 
 [secrets]
-allowlist_strings = ["AKIAIOSFODNN7EXAMPLE"]
+allowlist_strings = ["AKIAIOSFODNN7EXAMPLE", "mongodb://user:pass@host"]
 # Tests contain known-fake private keys for the private-key.pem rule.
 allowlist_paths   = ["dist/**", ".pipewarden-venv/**", "tests/test_secrets.py"]
