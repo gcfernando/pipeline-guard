@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Gehan\\\\Projects\\\\Pipeline-Guard\" -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(python -m py_compile src/pipeline_guard/*.py)",
+      "Bash(python -c \"from pipeline_guard.cli import main; print\\(f'main is callable: {callable\\(main\\)}'\\)\")",
+      "Bash(python -c ' *)"
+    ]
+  }
+}

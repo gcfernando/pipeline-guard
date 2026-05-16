@@ -5,13 +5,13 @@ on:
 
 permissions:
   contents: write       # for the GitHub Release
-  id-token: write       # for OIDC → PyPI Trusted Publisher + Sigstore
+  id-token: write       # for Sigstore artifact signing
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: release
       url: https://pypi.org/p/pipeline-guard
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +29,8 @@ jobs:
             ./dist/*.tar.gz
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # No password / API token — uses GitHub OIDC + PyPI Trusted Publisher.
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Attach to GitHub Release
         uses: softprops/action-gh-release@v2
         with:

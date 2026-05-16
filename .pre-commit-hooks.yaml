@@ -1,6 +1,6 @@
 # Allow consumers to use this repo as a pre-commit hook source:
 #
-#   - repo: https://github.com/example/pipeline-guard
+#   - repo: https://github.com/gcfernando/pipeline-guard
 #     rev: v1.0.0
 #     hooks:
 #       - id: pipeline-guard-secrets

@@ -66,7 +66,7 @@ def to_sarif(report: Report) -> str:
                 "driver": {
                     "name": "pipeline-guard",
                     "version": report.tool_version,
-                    "informationUri": "https://example.com/pipeline-guard",
+                    "informationUri": "https://github.com/gcfernando/pipeline-guard",
                     "rules": list(rules.values()),
                 },
             },

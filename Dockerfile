@@ -1,5 +1,5 @@
 # Minimal image: just the tool. Mount your repo at /work to use it.
-#   docker run --rm -v "$PWD:/work" ghcr.io/example/pipeline-guard:1.0.0 --root /work
+#   docker run --rm -v "$PWD:/work" ghcr.io/gcfernando/pipeline-guard:1.0.0 --root /work
 FROM python:3.12-slim AS builder
 WORKDIR /build
 COPY pyproject.toml README.md LICENSE ./

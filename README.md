@@ -12,7 +12,7 @@
 <br>
 
 [![Python](https://img.shields.io/badge/Python-3.10%20|%203.11%20|%203.12%20|%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-D22128?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-D22128?style=for-the-badge)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-73%20Passing-2EA44F?style=for-the-badge&logo=checkmarx&logoColor=white)](#)
 [![Coverage](https://img.shields.io/badge/Coverage-80%25%2B-2EA44F?style=for-the-badge)](#)
 [![Mypy](https://img.shields.io/badge/Mypy-Strict-1F5082?style=for-the-badge&logo=python&logoColor=white)](#)
@@ -2245,7 +2245,7 @@ Contributions are welcome! Whether you're fixing a bug, adding support for a new
 
 ## 📜 License
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under the [MIT License](LICENSE).
 
 You may use, modify, and distribute this software freely, including in commercial products.
 
@@ -2259,7 +2259,7 @@ You may use, modify, and distribute this software freely, including in commercia
 
 <br>
 
-<sub>No telemetry &nbsp;·&nbsp; No network calls at runtime &nbsp;·&nbsp; Zero runtime dependencies &nbsp;·&nbsp; Apache 2.0</sub>
+<sub>No telemetry &nbsp;·&nbsp; No network calls at runtime &nbsp;·&nbsp; Zero runtime dependencies &nbsp;·&nbsp; MIT License</sub>
 
 <br>
 
