@@ -98,10 +98,8 @@ def run_cmd(
 
                 # Wait briefly for the process to exit. This bounds how long
                 # we can be stuck before re-checking the deadline.
-                try:
+                with contextlib.suppress(subprocess.TimeoutExpired):
                     proc.wait(timeout=min(0.1, remaining))
-                except subprocess.TimeoutExpired:
-                    pass  # still running
 
                 # Drain whatever output is currently available. After the
                 # process exits the pipe closes and readline() returns "".
