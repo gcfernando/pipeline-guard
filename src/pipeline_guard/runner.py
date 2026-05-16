@@ -3,6 +3,7 @@
 Centralising this lets us guarantee timeouts, output capture, and a uniform
 StepResult for every command.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -66,13 +67,27 @@ def run_cmd(
     assert proc.stdout is not None
     deadline = time.monotonic() + timeout
 
+    def _append_line(stripped: str) -> None:
+        tail.append(stripped)
+        if len(tail) > TAIL_LINES * 4:
+            # Trim to avoid unbounded memory on chatty commands.
+            del tail[: len(tail) - TAIL_LINES * 2]
+
     try:
         try:
             while True:
-                if time.monotonic() > deadline:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
                     proc.kill()
                     with contextlib.suppress(subprocess.TimeoutExpired):
                         proc.wait(timeout=5)
+                    # Drain any final buffered output before returning.
+                    with contextlib.suppress(Exception):
+                        for line in proc.stdout:
+                            stripped = line.rstrip("\n")
+                            _append_line(stripped)
+                            if stream:
+                                print(f"{indent}{line}", end="")
                     return StepResult(
                         name=name,
                         status=Status.FAILED if required else Status.WARNED,
@@ -80,20 +95,28 @@ def run_cmd(
                         message=f"timeout after {timeout}s",
                         stdout_tail="\n".join(tail[-TAIL_LINES:]),
                     )
-                line = proc.stdout.readline()
-                if not line:
-                    if proc.poll() is not None:
+
+                # Wait briefly for the process to exit. This bounds how long
+                # we can be stuck before re-checking the deadline.
+                try:
+                    proc.wait(timeout=min(0.1, remaining))
+                except subprocess.TimeoutExpired:
+                    pass  # still running
+
+                # Drain whatever output is currently available. After the
+                # process exits the pipe closes and readline() returns "".
+                while True:
+                    line = proc.stdout.readline()
+                    if not line:
                         break
-                    # No data yet but process alive — short sleep to avoid busy loop.
-                    time.sleep(0.05)
-                    continue
-                stripped = line.rstrip("\n")
-                tail.append(stripped)
-                if len(tail) > TAIL_LINES * 4:
-                    # Trim to avoid unbounded memory on chatty commands.
-                    tail = tail[-TAIL_LINES * 2:]
-                if stream:
-                    print(f"{indent}{line}", end="")
+                    stripped = line.rstrip("\n")
+                    _append_line(stripped)
+                    if stream:
+                        print(f"{indent}{line}", end="")
+
+                if proc.poll() is not None:
+                    break
+
             returncode = proc.wait()
         finally:
             # Always close the pipe to avoid resource leaks (ResourceWarning).
@@ -109,14 +132,19 @@ def run_cmd(
     tail_str = "\n".join(tail[-TAIL_LINES:])
     if returncode == 0:
         return StepResult(
-            name=name, status=Status.PASSED,
-            duration_s=duration, returncode=0, stdout_tail=tail_str,
+            name=name,
+            status=Status.PASSED,
+            duration_s=duration,
+            returncode=0,
+            stdout_tail=tail_str,
         )
     return StepResult(
         name=name,
         status=Status.FAILED if required else Status.WARNED,
-        duration_s=duration, returncode=returncode,
-        message=f"exit {returncode}", stdout_tail=tail_str,
+        duration_s=duration,
+        returncode=returncode,
+        message=f"exit {returncode}",
+        stdout_tail=tail_str,
     )
 
 
