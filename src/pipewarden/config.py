@@ -2,7 +2,7 @@
 
 Config sources, in precedence order (later wins):
   1. Built-in defaults
-  2. .pipeline-guard.toml in the project root
+  2. .pipewarden.toml in the project root
   3. CLI flags
 """
 from __future__ import annotations
@@ -73,7 +73,7 @@ class PipelineConfig:
     fail_fast: bool = False
     only: list[str] = field(default_factory=list)
     skip: list[str] = field(default_factory=list)
-    docker_tag: str = "pipeline-guard-local:latest"
+    docker_tag: str = "pipewarden-local:latest"
     stages: StageToggles = field(default_factory=StageToggles)
     secrets: SecretsConfig = field(default_factory=SecretsConfig)
     timeouts: TimeoutsConfig = field(default_factory=TimeoutsConfig)
@@ -101,7 +101,7 @@ class PipelineConfig:
 # Loading
 # ---------------------------------------------------------------------------
 
-CONFIG_FILENAMES = (".pipeline-guard.toml", "pipeline-guard.toml")
+CONFIG_FILENAMES = (".pipewarden.toml", "pipewarden.toml")
 
 
 def find_config_file(root: Path) -> Path | None:
@@ -150,6 +150,6 @@ def load_config(path: Path | None) -> PipelineConfig:
     except tomllib.TOMLDecodeError as e:
         raise ConfigError(f"invalid TOML in {path}: {e}") from e
 
-    _coerce_into(cfg, data, "pipeline-guard")
+    _coerce_into(cfg, data, "pipewarden")
     cfg.validate()
     return cfg

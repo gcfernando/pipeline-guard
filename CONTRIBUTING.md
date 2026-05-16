@@ -6,7 +6,7 @@ Thanks for considering a contribution!
 
 ```bash
 git clone <repo>
-cd pipeline-guard
+cd pipewarden
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```

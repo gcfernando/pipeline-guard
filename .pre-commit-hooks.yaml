@@ -1,33 +1,33 @@
 # Allow consumers to use this repo as a pre-commit hook source:
 #
-#   - repo: https://github.com/gcfernando/pipeline-guard
+#   - repo: https://github.com/gcfernando/pipewarden
 #     rev: v1.0.0
 #     hooks:
-#       - id: pipeline-guard-secrets
-#       - id: pipeline-guard-diff
+#       - id: pipewarden-secrets
+#       - id: pipewarden-diff
 #
-- id: pipeline-guard-secrets
-  name: pipeline-guard (secrets only)
+- id: pipewarden-secrets
+  name: pipewarden (secrets only)
   description: Scan staged files for committed secrets.
-  entry: pipeline-guard --only secrets --no-color
+  entry: pipewarden --only secrets --no-color
   language: python
   pass_filenames: false
   always_run: true
   stages: [pre-commit, pre-push]
 
-- id: pipeline-guard-diff
-  name: pipeline-guard (changed files only)
+- id: pipewarden-diff
+  name: pipewarden (changed files only)
   description: Fast pre-push check — scans files changed vs origin/main.
-  entry: pipeline-guard --only secrets --diff origin/main --no-color
+  entry: pipewarden --only secrets --diff origin/main --no-color
   language: python
   pass_filenames: false
   always_run: true
   stages: [pre-push]
 
-- id: pipeline-guard-full
-  name: pipeline-guard (full)
+- id: pipewarden-full
+  name: pipewarden (full)
   description: Full local CI run. Slower; use sparingly.
-  entry: pipeline-guard --no-color
+  entry: pipewarden --no-color
   language: python
   pass_filenames: false
   always_run: true

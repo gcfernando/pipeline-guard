@@ -1,4 +1,4 @@
-# Reference: `.pipeline-guard.toml`
+# Reference: `.pipewarden.toml`
 
 Drop this file at the root of your repository. All keys are optional; values shown are the built-in defaults.
 
@@ -7,7 +7,7 @@ Drop this file at the root of your repository. All keys are optional; values sho
 fail_fast = false
 
 # Default Docker tag used by the docker stage.
-docker_tag = "pipeline-guard-local:latest"
+docker_tag = "pipewarden-local:latest"
 
 # Run only these stages (empty = all).
 only = []
@@ -56,9 +56,9 @@ allowlist_strings = [
 
 [output]
 # When set, write these regardless of CLI flags.
-# sarif_path = "pipeline-guard.sarif"
-# junit_path = "pipeline-guard-junit.xml"
-# log_path   = "pipeline-guard.log"
+# sarif_path = "pipewarden.sarif"
+# junit_path = "pipewarden-junit.xml"
+# log_path   = "pipewarden.log"
 color = true
 quiet = false
 ```

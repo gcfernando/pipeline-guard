@@ -1,5 +1,5 @@
 # Minimal image: just the tool. Mount your repo at /work to use it.
-#   docker run --rm -v "$PWD:/work" ghcr.io/gcfernando/pipeline-guard:1.0.0 --root /work
+#   docker run --rm -v "$PWD:/work" ghcr.io/gcfernando/pipewarden:1.0.0 --root /work
 FROM python:3.12-slim AS builder
 WORKDIR /build
 COPY pyproject.toml README.md LICENSE ./
@@ -16,5 +16,5 @@ RUN pip install --no-cache-dir /tmp/*.whl && rm /tmp/*.whl
 RUN useradd --create-home --uid 1000 guard
 USER guard
 WORKDIR /work
-ENTRYPOINT ["pipeline-guard"]
+ENTRYPOINT ["pipewarden"]
 CMD ["--help"]

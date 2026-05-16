@@ -18,7 +18,7 @@ from .secrets import scan_secrets
 from .stages import STAGES
 from .types import Report, Status, StepResult
 
-log = logging.getLogger("pipeline_guard")
+log = logging.getLogger("pipewarden")
 
 
 # ---------------------------------------------------------------------------
@@ -53,14 +53,14 @@ def _setup_logging(log_path: str | None, verbose: bool) -> None:
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        prog="pipeline-guard",
+        prog="pipewarden",
         description="Detect, install, lint, test, build, scan — locally or in CI.",
     )
-    p.add_argument("--version", action="version", version=f"pipeline-guard {__version__}")
+    p.add_argument("--version", action="version", version=f"pipewarden {__version__}")
     p.add_argument("--root", type=Path, default=Path.cwd(),
                    help="project root (default: cwd)")
     p.add_argument("--config", type=Path, default=None,
-                   help="path to a .pipeline-guard.toml (default: auto-discovered)")
+                   help="path to a .pipewarden.toml (default: auto-discovered)")
     p.add_argument("--skip", action="append", default=[], choices=ALL_STAGES,
                    help="skip a stage (repeatable)")
     p.add_argument("--only", action="append", default=[], choices=ALL_STAGES,
@@ -150,7 +150,7 @@ def main(argv: list[str] | None = None) -> int:
         raise KeyboardInterrupt
     signal.signal(signal.SIGINT, _handle_sigint)
 
-    printer.section(f"Pipeline Guard {__version__}")
+    printer.section(f"Pipewarden {__version__}")
     d = detect(root)
     report.detected = d.labels()
     printer.info(f"root:     {root}")

@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-from pipeline_guard.runner import capture, run_cmd
-from pipeline_guard.types import Status
+from pipewarden.runner import capture, run_cmd
+from pipewarden.types import Status
 
 
 def test_missing_binary_required(tmp_path: Path) -> None:

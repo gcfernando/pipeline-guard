@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pipeline_guard.detect import detect
+from pipewarden.detect import detect
 
 
 def test_empty_directory_detects_nothing(tmp_project: Path) -> None:

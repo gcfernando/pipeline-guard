@@ -1,4 +1,4 @@
-# Pipeline Guard runs against itself in CI.
+# Pipewarden runs against itself in CI.
 [stages]
 docker = false  # no docker daemon in our test env
 vulns  = false  # we don't ship lockfiles here
@@ -6,4 +6,4 @@ vulns  = false  # we don't ship lockfiles here
 [secrets]
 allowlist_strings = ["AKIAIOSFODNN7EXAMPLE"]
 # Tests contain known-fake private keys for the private-key.pem rule.
-allowlist_paths   = ["dist/**", ".pipeline-guard-venv/**", "tests/test_secrets.py"]
+allowlist_paths   = ["dist/**", ".pipewarden-venv/**", "tests/test_secrets.py"]

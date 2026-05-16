@@ -64,9 +64,9 @@ def to_sarif(report: Report) -> str:
         "runs": [{
             "tool": {
                 "driver": {
-                    "name": "pipeline-guard",
+                    "name": "pipewarden",
                     "version": report.tool_version,
-                    "informationUri": "https://github.com/gcfernando/pipeline-guard",
+                    "informationUri": "https://github.com/gcfernando/pipewarden",
                     "rules": list(rules.values()),
                 },
             },
@@ -88,14 +88,14 @@ def to_junit_xml(report: Report) -> str:
     suite_time = f"{report.duration_s:.3f}"
 
     testsuites = ET.Element("testsuites", {
-        "name": "pipeline-guard",
+        "name": "pipewarden",
         "tests": str(total),
         "failures": str(failures),
         "skipped": str(skipped),
         "time": suite_time,
     })
     testsuite = ET.SubElement(testsuites, "testsuite", {
-        "name": "pipeline-guard",
+        "name": "pipewarden",
         "tests": str(total),
         "failures": str(failures),
         "skipped": str(skipped),
@@ -104,7 +104,7 @@ def to_junit_xml(report: Report) -> str:
 
     for s in report.steps:
         case = ET.SubElement(testsuite, "testcase", {
-            "classname": "pipeline-guard",
+            "classname": "pipewarden",
             "name": s.name,
             "time": f"{s.duration_s:.3f}",
         })

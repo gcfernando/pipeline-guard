@@ -1,0 +1,116 @@
+Run pypa/gh-action-pypi-publish@release/v1
+Run # Reset path if needed
+Run # 🔎 Discover pre-installed Python
+python-path=/opt/hostedtoolcache/Python/3.12.13/x64/bin/python3
+Run # Create Docker container action
+Run ./.github/.tmp/.generated-actions/run-pypi-publish-in-docker-container
+/usr/bin/docker run --name ghcriopypaghactionpypipublishreleasev1_66b6a5 --label b50086 --workdir /github/workspace --rm -e "pythonLocation" -e "PKG_CONFIG_PATH" -e "Python_ROOT_DIR" -e "Python2_ROOT_DIR" -e "Python3_ROOT_DIR" -e "LD_LIBRARY_PATH" -e "INPUT_USER" -e "INPUT_PASSWORD" -e "INPUT_REPOSITORY-URL" -e "INPUT_PACKAGES-DIR" -e "INPUT_VERIFY-METADATA" -e "INPUT_SKIP-EXISTING" -e "INPUT_VERBOSE" -e "INPUT_PRINT-HASH" -e "INPUT_ATTESTATIONS" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSI
+Unable to find image 'ghcr.io/pypa/gh-action-pypi-publish:release-v1' locally
+release-v1: Pulling from pypa/gh-action-pypi-publish
+9d11882d4b58: Pulling fs layer
+4eeb9a554e5a: Pulling fs layer
+559c2b59f78d: Pulling fs layer
+02b5ccdcca95: Pulling fs layer
+a3051f342870: Pulling fs layer
+b0c54e5184e0: Pulling fs layer
+736d1ace839c: Pulling fs layer
+f49adb0f2ede: Pulling fs layer
+77c4c4ac7b62: Pulling fs layer
+b9db235c841b: Pulling fs layer
+0501f1b4799b: Pulling fs layer
+191533a2d4ee: Pulling fs layer
+b003759e3ef8: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+77c4c4ac7b62: Waiting
+b9db235c841b: Waiting
+02b5ccdcca95: Waiting
+a3051f342870: Waiting
+b0c54e5184e0: Waiting
+0501f1b4799b: Waiting
+736d1ace839c: Waiting
+191533a2d4ee: Waiting
+f49adb0f2ede: Waiting
+b003759e3ef8: Waiting
+4f4fb700ef54: Waiting
+4eeb9a554e5a: Download complete
+559c2b59f78d: Download complete
+02b5ccdcca95: Verifying Checksum
+02b5ccdcca95: Download complete
+9d11882d4b58: Verifying Checksum
+9d11882d4b58: Download complete
+a3051f342870: Verifying Checksum
+a3051f342870: Download complete
+736d1ace839c: Download complete
+f49adb0f2ede: Download complete
+b9db235c841b: Download complete
+77c4c4ac7b62: Verifying Checksum
+77c4c4ac7b62: Download complete
+b0c54e5184e0: Verifying Checksum
+b0c54e5184e0: Download complete
+191533a2d4ee: Verifying Checksum
+191533a2d4ee: Download complete
+0501f1b4799b: Verifying Checksum
+0501f1b4799b: Download complete
+b003759e3ef8: Verifying Checksum
+b003759e3ef8: Download complete
+4f4fb700ef54: Download complete
+9d11882d4b58: Pull complete
+4eeb9a554e5a: Pull complete
+559c2b59f78d: Pull complete
+02b5ccdcca95: Pull complete
+a3051f342870: Pull complete
+b0c54e5184e0: Pull complete
+736d1ace839c: Pull complete
+f49adb0f2ede: Pull complete
+77c4c4ac7b62: Pull complete
+b9db235c841b: Pull complete
+0501f1b4799b: Pull complete
+191533a2d4ee: Pull complete
+b003759e3ef8: Pull complete
+4f4fb700ef54: Pull complete
+Digest: sha256:6d88f308559d95bdafd10ac3d0b6ed95df4e2daaf7f97f6d4588d8c14ca1fbdd
+Status: Downloaded newer image for ghcr.io/pypa/gh-action-pypi-publish:release-v1
+Warning: Trusted Publishers allows publishing packages to PyPI from automated environments like GitHub Actions without needing to use username/password combinations or API tokens to authenticate with PyPI. Read more: https://docs.pypi.org/trusted-publishers
+Warning: A new Trusted Publisher for the currently running publishing workflow can be created by accessing the following link(s) while logged-in as an owner of the package(s):
+- https://pypi.org/manage/project/pipeline-guard/settings/publishing/?provider=github&owner=gcfernando&repository=pipeline-guard&workflow_filename=publish.yml
+Checking dist/pipeline_guard-1.0.0-py3-none-any.whl: PASSED
+Checking dist/pipeline_guard-1.0.0.tar.gz: PASSED
+Showing hash values of files to be uploaded:
+/github/workspace/dist/pipeline_guard-1.0.0.tar.gz
+SHA256: 68c5596ac4c90e121315b38bbed1841722ddf0a257d3e8b38ec1e5f7ae94dedb
+MD5: 023fdc255b041b54c7f686dc22d85d7b
+BLAKE2-256: f43e0d0b66d4440060ddb6a9f25f6e5be590b3960081c41b513d836ed6e5b147
+/github/workspace/dist/pipeline_guard-1.0.0-py3-none-any.whl
+SHA256: 686f0f6bd7256bd0125b57338c65816edd1fa8583fdd1cc11864574f97bf4ca2
+MD5: f7cb1d3c964ea65829ac8eaccd344efb
+BLAKE2-256: 34162c1b8f060832f7021889bf4aea8aa8835264eefc8384f3d793fc479185dc
+Uploading distributions to https://upload.pypi.org/legacy/
+INFO     dist/pipeline_guard-1.0.0-py3-none-any.whl (43.7 KB)                   
+INFO     dist/pipeline_guard-1.0.0.tar.gz (67.0 KB)                             
+INFO     username set by command options                                        
+INFO     password set by command options                                        
+INFO     username: __token__                                                    
+INFO     password: <hidden>                                                     
+Uploading pipeline_guard-1.0.0-py3-none-any.whl
+INFO     Response from https://upload.pypi.org/legacy/:                         
+         400 Bad Request                                                        
+INFO     <html>                                                                 
+          <head>                                                                
+           <title>400 The name 'pipeline-guard' is too similar to an existing   
+         project. See https://pypi.org/help/#project-name for more              
+         information.</title>                                                   
+          </head>                                                               
+          <body>                                                                
+           <h1>400 The name 'pipeline-guard' is too similar to an existing      
+         project. See https://pypi.org/help/#project-name for more              
+         information.</h1>                                                      
+           The server could not comply with the request since it is either      
+         malformed or otherwise incorrect.<br/><br/>                            
+         The name &#x27;pipeline-guard&#x27; is too similar to an existing      
+         project. See https://pypi.org/help/#project-name for more information. 
+                                                                                
+                                                                                
+          </body>                                                               
+         </html>                                                                
+ERROR    HTTPError: 400 Bad Request from https://upload.pypi.org/legacy/        
+         Bad Request   

@@ -1,4 +1,4 @@
-"""Allow `python -m pipeline_guard ...`."""
+"""Allow `python -m pipewarden ...`."""
 import sys
 
 from .cli import main

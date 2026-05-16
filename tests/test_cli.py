@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from pipeline_guard.cli import main
+from pipewarden.cli import main
 
 
 def test_help_runs(capsys: pytest.CaptureFixture[str]) -> None:
@@ -13,7 +13,7 @@ def test_help_runs(capsys: pytest.CaptureFixture[str]) -> None:
     rc = main(["--help"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "pipeline-guard" in out
+    assert "pipewarden" in out
     assert "--sarif-out" in out
 
 
@@ -21,7 +21,7 @@ def test_version_runs(capsys: pytest.CaptureFixture[str]) -> None:
     rc = main(["--version"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "pipeline-guard" in out
+    assert "pipewarden" in out
 
 
 def test_empty_dir_succeeds(tmp_path: Path) -> None:
@@ -79,7 +79,7 @@ def test_junit_output_written(tmp_path: Path) -> None:
 
 
 def test_config_file_loaded(tmp_path: Path) -> None:
-    (tmp_path / ".pipeline-guard.toml").write_text("[secrets]\nenabled = false\n")
+    (tmp_path / ".pipewarden.toml").write_text("[secrets]\nenabled = false\n")
     (tmp_path / "leak.py").write_text("KEY='AKIAIOSFODNN7EXAMPLE'\n")
     rc = main(["--root", str(tmp_path)])
     assert rc == 0  # secrets disabled in config → secret-leak ignored
@@ -87,7 +87,7 @@ def test_config_file_loaded(tmp_path: Path) -> None:
 
 def test_bad_config_returns_config_error(tmp_path: Path,
                                          capsys: pytest.CaptureFixture[str]) -> None:
-    (tmp_path / ".pipeline-guard.toml").write_text("bogus = 1\n")
+    (tmp_path / ".pipewarden.toml").write_text("bogus = 1\n")
     rc = main(["--root", str(tmp_path)])
     assert rc == 3
     err = capsys.readouterr().err
@@ -95,9 +95,9 @@ def test_bad_config_returns_config_error(tmp_path: Path,
 
 
 def test_invoked_as_module(tmp_path: Path) -> None:
-    # Sanity check the `python -m pipeline_guard` entry point.
+    # Sanity check the `python -m pipewarden` entry point.
     result = subprocess.run(
-        [sys.executable, "-m", "pipeline_guard", "--root", str(tmp_path), "--no-color"],
+        [sys.executable, "-m", "pipewarden", "--root", str(tmp_path), "--no-color"],
         capture_output=True, text=True, encoding="utf-8", timeout=30,
     )
     assert result.returncode == 0, result.stderr

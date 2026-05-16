@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from pipeline_guard.config import (
+from pipewarden.config import (
     ConfigError,
     PipelineConfig,
     find_config_file,
@@ -23,13 +23,13 @@ def test_find_config_file_missing(tmp_path: Path) -> None:
 
 
 def test_find_config_file_present(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text("")
     assert find_config_file(tmp_path) == p
 
 
 def test_load_simple_config(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text(
         'fail_fast = true\n'
         'docker_tag = "myapp:ci"\n'
@@ -51,35 +51,35 @@ def test_load_simple_config(tmp_path: Path) -> None:
 
 
 def test_unknown_key_rejected(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text('bogus_key = 1\n')
     with pytest.raises(ConfigError):
         load_config(p)
 
 
 def test_unknown_stage_rejected(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text('skip = ["nope"]\n')
     with pytest.raises(ConfigError):
         load_config(p)
 
 
 def test_bad_type_rejected(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text('[timeouts]\ninstall_s = "fast"\n')
     with pytest.raises(ConfigError):
         load_config(p)
 
 
 def test_invalid_timeout_value(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text('[timeouts]\ninstall_s = 0\n')
     with pytest.raises(ConfigError):
         load_config(p)
 
 
 def test_malformed_toml(tmp_path: Path) -> None:
-    p = tmp_path / ".pipeline-guard.toml"
+    p = tmp_path / ".pipewarden.toml"
     p.write_text('this is not [valid')
     with pytest.raises(ConfigError):
         load_config(p)

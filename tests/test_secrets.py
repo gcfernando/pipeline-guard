@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from pipeline_guard.config import SecretsConfig
-from pipeline_guard.secrets import SECRET_PATTERNS, scan_secrets_fallback
-from pipeline_guard.types import Status
+from pipewarden.config import SecretsConfig
+from pipewarden.secrets import SECRET_PATTERNS, scan_secrets_fallback
+from pipewarden.types import Status
 
 
 def test_clean_repo(tmp_path: Path) -> None:

@@ -1,6 +1,6 @@
-name: "Pipeline Guard"
+name: "Pipewarden"
 description: "Detect, install, lint, test, build, scan — locally or in CI."
-author: "Pipeline Guard contributors"
+author: "Pipewarden contributors"
 branding:
   icon: "shield"
   color: "blue"
@@ -35,11 +35,11 @@ inputs:
     required: false
     default: ""
   python-version:
-    description: "Python interpreter to use for pipeline-guard itself."
+    description: "Python interpreter to use for pipewarden itself."
     required: false
     default: "3.12"
   version:
-    description: "pipeline-guard version to install (e.g. '1.0.0'). Default: latest."
+    description: "pipewarden version to install (e.g. '1.0.0'). Default: latest."
     required: false
     default: ""
 
@@ -51,16 +51,16 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Install pipeline-guard
+    - name: Install pipewarden
       shell: bash
       run: |
         if [[ -n "${{ inputs.version }}" ]]; then
-          python -m pip install --quiet "pipeline-guard==${{ inputs.version }}"
+          python -m pip install --quiet "pipewarden==${{ inputs.version }}"
         else
-          python -m pip install --quiet pipeline-guard
+          python -m pip install --quiet pipewarden
         fi
 
-    - name: Run pipeline-guard
+    - name: Run pipewarden
       shell: bash
       env:
         ROOT: ${{ inputs.root }}
@@ -81,4 +81,4 @@ runs:
         [[ -n "$SARIF" ]] && args+=( "--sarif-out" "$SARIF" )
         [[ -n "$JUNIT" ]] && args+=( "--junit-out" "$JUNIT" )
         [[ -n "$DIFF"  ]] && args+=( "--diff" "$DIFF" )
-        pipeline-guard "${args[@]}"
+        pipewarden "${args[@]}"

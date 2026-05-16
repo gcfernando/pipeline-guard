@@ -2,7 +2,7 @@
 
 <br>
 
-<img src="https://img.shields.io/badge/🛡️-Pipeline%20Guard-0969DA?style=for-the-badge" alt="Pipeline Guard" height="48"/>
+<img src="https://img.shields.io/badge/🛡️-Pipewarden-0969DA?style=for-the-badge" alt="Pipewarden" height="48"/>
 
 <br><br>
 
@@ -28,7 +28,7 @@
 
 | # | Section |
 |---|---------|
-| 1 | [What Is Pipeline Guard?](#-what-is-pipeline-guard) |
+| 1 | [What Is Pipewarden?](#-what-is-pipewarden) |
 | 2 | [The Problem It Solves](#-the-problem-it-solves) |
 | 3 | [Who Should Use It?](#-who-should-use-it) |
 | 4 | [See It In Action](#-see-it-in-action) |
@@ -50,9 +50,9 @@
 
 ---
 
-## 🛡️ What Is Pipeline Guard?
+## 🛡️ What Is Pipewarden?
 
-**Pipeline Guard** is a free, open-source command-line tool that acts as a **universal quality gate** for any software project.
+**Pipewarden** is a free, open-source command-line tool that acts as a **universal quality gate** for any software project.
 
 In plain language: you run **one command** and it automatically:
 
@@ -100,11 +100,11 @@ This creates real problems:
 | Polyglot repos need multiple pipelines | Maintenance cost multiplies with each language |
 | No standard reports | Security findings live in logs, not dashboards |
 
-### The Pipeline Guard Way
+### The Pipewarden Way
 
 ```bash
-pip install pipeline-guard
-pipeline-guard
+pip install pipewarden
+pipewarden
 ```
 
 That's it. Same command for every project. Every language. Every CI system.
@@ -113,7 +113,7 @@ That's it. Same command for every project. Every language. Every CI system.
 
 ## 👥 Who Should Use It?
 
-| Role | How Pipeline Guard Helps |
+| Role | How Pipewarden Helps |
 |------|--------------------------|
 | **Individual Developer** | Run the same quality checks locally that CI runs remotely. Catch issues before pushing. |
 | **Team Lead / Tech Lead** | Enforce a consistent quality baseline across all repositories with zero per-project setup. |
@@ -129,10 +129,10 @@ That's it. Same command for every project. Every language. Every CI system.
 Here is what a real run looks like on a Python + Node + Docker project:
 
 ```console
-$ pipeline-guard
+$ pipewarden
 
 ════════════════════════════════════════════════════════════════
-  Pipeline Guard 1.0.0
+  Pipewarden 1.0.0
 ════════════════════════════════════════════════════════════════
   root:     /home/alice/my-app
   config:   (defaults — no config file found)
@@ -188,7 +188,7 @@ $ pipeline-guard
 Now here is what it looks like when a developer accidentally commits an AWS key:
 
 ```console
-$ pipeline-guard
+$ pipewarden
 
 ════════════════════════════════════════════════════════════════
   Secrets
@@ -216,35 +216,35 @@ Findings (1):
 ### Option 1 — Install from PyPI *(recommended)*
 
 ```bash
-pip install pipeline-guard
+pip install pipewarden
 ```
 
 Verify the installation:
 
 ```bash
-pipeline-guard --version
-# → pipeline-guard 1.0.0
+pipewarden --version
+# → pipewarden 1.0.0
 ```
 
 ### Option 2 — Install from Source
 
 ```bash
-pip install git+https://github.com/gcfernando/pipeline-guard.git@v1.0.0
+pip install git+https://github.com/gcfernando/pipewarden.git@v1.0.0
 ```
 
 ### Option 3 — Docker
 
 ```bash
-docker run --rm -v "$(pwd):/repo" ghcr.io/gcfernando/pipeline-guard:latest \
-  pipeline-guard --root /repo
+docker run --rm -v "$(pwd):/repo" ghcr.io/gcfernando/pipewarden:latest \
+  pipewarden --root /repo
 ```
 
 ### Troubleshooting Installation
 
 | Error | Fix |
 |-------|-----|
-| `Permission denied` | `pip install --user pipeline-guard` |
-| `externally-managed-environment` | `pip install --break-system-packages pipeline-guard` |
+| `Permission denied` | `pip install --user pipewarden` |
+| `externally-managed-environment` | `pip install --break-system-packages pipewarden` |
 | `command not found` after install | Add `~/.local/bin` to your `PATH` |
 
 > **No runtime dependencies.** On Python 3.11+ the tool has literally zero third-party dependencies. On 3.10 it needs only `tomli` for TOML parsing. Nothing else is installed into your project.
@@ -253,11 +253,11 @@ docker run --rm -v "$(pwd):/repo" ghcr.io/gcfernando/pipeline-guard:latest \
 
 ## ⚙️ How It Works — The 6 Stages
 
-Pipeline Guard always runs stages in this order. Each stage only runs if the relevant files are detected.
+Pipewarden always runs stages in this order. Each stage only runs if the relevant files are detected.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    PIPELINE GUARD FLOW                          │
+│                    Pipewarden FLOW                          │
 ├──────────┬──────────────────────────────────────────────────────┤
 │ Stage 1  │  DETECT                                              │
 │          │  Reads the project folder. Identifies which          │
@@ -294,11 +294,11 @@ Pipeline Guard always runs stages in this order. Each stage only runs if the rel
 | `Cargo.toml` | **Rust** | cargo fetch → cargo clippy → cargo build → cargo test |
 | `Dockerfile` or `Containerfile` | **Docker** | hadolint (lint) → docker build |
 
-> **Polyglot repos are fully supported.** A monorepo containing Python, Node, and Rust will run all three pipelines in a single `pipeline-guard` invocation.
+> **Polyglot repos are fully supported.** A monorepo containing Python, Node, and Rust will run all three pipelines in a single `pipewarden` invocation.
 
 ### Package Manager Auto-Detection
 
-Pipeline Guard picks the right tool automatically — no config needed:
+Pipewarden picks the right tool automatically — no config needed:
 
 **Python:**
 ```
@@ -318,7 +318,7 @@ package-lock.json?  → uses npm ci
 
 ### Vulnerability Scanning (optional)
 
-When the `vulns` stage is enabled, Pipeline Guard runs dependency vulnerability scans using whichever tools are installed:
+When the `vulns` stage is enabled, Pipewarden runs dependency vulnerability scans using whichever tools are installed:
 
 | Tool | Language | What it scans |
 |------|----------|---------------|
@@ -335,7 +335,7 @@ If none of these tools are installed, the stage is **skipped** — it never bloc
 
 ### The Traditional Python Pipeline (What Teams Write Today)
 
-Before Pipeline Guard, every Python project requires writing and maintaining a CI pipeline from scratch. Here is what a typical production-grade Python pipeline looks like:
+Before Pipewarden, every Python project requires writing and maintaining a CI pipeline from scratch. Here is what a typical production-grade Python pipeline looks like:
 
 ```yaml
 # .github/workflows/ci.yml  ← The traditional approach
@@ -425,10 +425,10 @@ jobs:
 
 ---
 
-### With Pipeline Guard — 5 Lines Replace 80
+### With Pipewarden — 5 Lines Replace 80
 
 ```yaml
-# .github/workflows/ci.yml  ← The Pipeline Guard approach
+# .github/workflows/ci.yml  ← The Pipewarden approach
 name: CI
 
 on:
@@ -448,8 +448,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pipeline-guard
-      - run: pipeline-guard --sarif-out report.sarif --junit-out junit.xml
+      - run: pip install pipewarden
+      - run: pipewarden --sarif-out report.sarif --junit-out junit.xml
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
@@ -460,11 +460,11 @@ One job. One command. Secret scanning, dependency installation, linting, type ch
 
 ---
 
-### Step-by-Step: Exactly What Pipeline Guard Does for a Python Project
+### Step-by-Step: Exactly What Pipewarden Does for a Python Project
 
 #### Step 1 — Detection
 
-Pipeline Guard scans the project root for any of these files:
+Pipewarden scans the project root for any of these files:
 
 | File found | Result |
 |------------|--------|
@@ -477,26 +477,26 @@ Pipeline Guard scans the project root for any of these files:
 #### Step 2 — Create Virtual Environment
 
 ```bash
-python -m venv .pipeline-guard-venv
+python -m venv .pipewarden-venv
 ```
 
-Creates `.pipeline-guard-venv/` inside your project root. If it already exists, it is **reused** (the creation step is skipped entirely). This makes local re-runs fast.
+Creates `.pipewarden-venv/` inside your project root. If it already exists, it is **reused** (the creation step is skipped entirely). This makes local re-runs fast.
 
 ```console
 ✓ py:venv (2.9s)    # created fresh
 ✓ py:venv (0.0s)    # reused existing — not shown if it exists
 ```
 
-> Pipeline Guard **never touches** your existing `.venv`, `venv`, or `env` folder. It always uses its own isolated environment.
+> Pipewarden **never touches** your existing `.venv`, `venv`, or `env` folder. It always uses its own isolated environment.
 
 Add the folder to `.gitignore`:
 ```
-.pipeline-guard-venv/
+.pipewarden-venv/
 ```
 
 #### Step 3 — Install Dependencies
 
-Pipeline Guard checks which package manager to use in this exact priority order:
+Pipewarden checks which package manager to use in this exact priority order:
 
 ```
 1. uv.lock present  AND  uv on PATH?
@@ -597,7 +597,7 @@ ignore_missing_imports = true
 
 #### Step 6 — Test with pytest
 
-First, Pipeline Guard **probes** whether pytest is importable in the virtual environment:
+First, Pipewarden **probes** whether pytest is importable in the virtual environment:
 
 ```bash
 python -m python -c "import pytest"    # internal probe — not shown in output
@@ -610,7 +610,7 @@ If pytest is not installed, you get a clear warning instead of a confusing error
                      add it as a dep or skip this stage
 ```
 
-If pytest is available, Pipeline Guard runs:
+If pytest is available, Pipewarden runs:
 
 ```bash
 python -m pytest -q
@@ -668,7 +668,7 @@ my-app/
     └── test_main.py
 ```
 
-> **Important:** Make sure `pytest` is listed in `requirements.txt`. If it is only in a separate `requirements-dev.txt`, Pipeline Guard will not install it automatically — add it to the main file or switch to `pyproject.toml`.
+> **Important:** Make sure `pytest` is listed in `requirements.txt`. If it is only in a separate `requirements-dev.txt`, Pipewarden will not install it automatically — add it to the main file or switch to `pyproject.toml`.
 
 **Output:**
 ```console
@@ -766,19 +766,19 @@ my-analysis/
 #### Run only Python (skip all other detected languages)
 
 ```bash
-pipeline-guard --only python
+pipewarden --only python
 ```
 
 #### Run secrets + Python (recommended pre-push hook)
 
 ```bash
-pipeline-guard --only secrets --only python
+pipewarden --only secrets --only python
 ```
 
 #### Tune timeouts for a slow test suite
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 [timeouts]
 test_s    = 3600    # 60 minutes
 install_s = 1800    # 30 minutes for heavy deps (PyTorch etc.)
@@ -787,7 +787,7 @@ install_s = 1800    # 30 minutes for heavy deps (PyTorch etc.)
 #### Disable the Python stage entirely
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 [stages]
 python = false
 ```
@@ -795,7 +795,7 @@ python = false
 #### Full example for a Python microservice
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 fail_fast = false
 
 [stages]
@@ -823,25 +823,25 @@ allowlist_paths = [
 ### Python Local Development Workflow
 
 ```bash
-# First run — creates .pipeline-guard-venv and installs all deps
-pipeline-guard
+# First run — creates .pipewarden-venv and installs all deps
+pipewarden
 
 # Subsequent runs — reuses venv, fast
-pipeline-guard
+pipewarden
 
 # Quick lint + test loop while developing
-pipeline-guard --only python
+pipewarden --only python
 
 # Pre-commit check (secrets only — sub-second)
-pipeline-guard --only secrets
+pipewarden --only secrets
 
 # Pre-push full check
-pipeline-guard --only secrets --only python
+pipewarden --only secrets --only python
 
 # Force reinstall after changing dependencies
-Remove-Item -Recurse -Force .pipeline-guard-venv   # Windows
-# rm -rf .pipeline-guard-venv                      # macOS/Linux
-pipeline-guard
+Remove-Item -Recurse -Force .pipewarden-venv   # Windows
+# rm -rf .pipewarden-venv                      # macOS/Linux
+pipewarden
 ```
 
 ---
@@ -865,7 +865,7 @@ pipeline-guard
 
 ### The Traditional .NET Pipeline (What Teams Write Today)
 
-Here is a representative production .NET CI pipeline before Pipeline Guard:
+Here is a representative production .NET CI pipeline before Pipewarden:
 
 ```yaml
 # .github/workflows/dotnet-ci.yml  ← The traditional approach
@@ -986,10 +986,10 @@ jobs:
 
 ---
 
-### With Pipeline Guard — 5 Lines Replace 100
+### With Pipewarden — 5 Lines Replace 100
 
 ```yaml
-# .github/workflows/ci.yml  ← The Pipeline Guard approach
+# .github/workflows/ci.yml  ← The Pipewarden approach
 name: CI
 
 on:
@@ -1009,15 +1009,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pipeline-guard
-      - run: pipeline-guard --sarif-out report.sarif --junit-out junit.xml
+      - run: pip install pipewarden
+      - run: pipewarden --sarif-out report.sarif --junit-out junit.xml
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: report.sarif
 ```
 
-Pipeline Guard:
+Pipewarden:
 - Detects `.sln` / `.csproj` files automatically
 - Runs `dotnet restore` → `dotnet build` → `dotnet test` in the correct order with the correct flags
 - Runs secret scanning first, before any build starts
@@ -1026,11 +1026,11 @@ Pipeline Guard:
 
 ---
 
-### Step-by-Step: Exactly What Pipeline Guard Does for a .NET Project
+### Step-by-Step: Exactly What Pipewarden Does for a .NET Project
 
 #### Step 1 — Detection
 
-Pipeline Guard scans the project root for:
+Pipewarden scans the project root for:
 
 | File found | Result |
 |------------|--------|
@@ -1055,7 +1055,7 @@ Downloads all NuGet packages declared in every project in the solution.
 ✗ dotnet:restore  (8.1s)    ← Failed — full error printed (missing package, bad feed, etc.)
 ```
 
-**If this step fails, Pipeline Guard stops.** There is no point trying to build without dependencies. The exact output from `dotnet restore` is printed in the failure tail so you see the specific package and version that failed.
+**If this step fails, Pipewarden stops.** There is no point trying to build without dependencies. The exact output from `dotnet restore` is printed in the failure tail so you see the specific package and version that failed.
 
 **Common failure causes:**
 - A package version was removed from NuGet.org (use a lock file to pin versions)
@@ -1252,7 +1252,7 @@ PaymentService/
 └── Dockerfile
 ```
 
-Pipeline Guard reads `NuGet.config` automatically — you just need the feed credentials in environment variables before running.
+Pipewarden reads `NuGet.config` automatically — you just need the feed credentials in environment variables before running.
 
 ---
 
@@ -1261,20 +1261,20 @@ Pipeline Guard reads `NuGet.config` automatically — you just need the feed cre
 #### No config needed for a simple project
 
 ```bash
-pipeline-guard    # auto-detects .sln, runs restore → build → test
+pipewarden    # auto-detects .sln, runs restore → build → test
 ```
 
 #### Skip Docker (no Docker daemon in this CI environment)
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 [stages]
 docker = false
 ```
 
 Or from the CLI:
 ```bash
-pipeline-guard --skip docker
+pipewarden --skip docker
 ```
 
 #### Increase timeouts for large enterprise solutions
@@ -1282,7 +1282,7 @@ pipeline-guard --skip docker
 Large .NET solutions with 20+ projects can take 5–15 minutes to build:
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 [timeouts]
 install_s = 600     # 10 min for NuGet restore
 build_s   = 1200    # 20 min to compile large solutions
@@ -1292,19 +1292,19 @@ test_s    = 3600    # 60 min for extensive test suites
 #### Run only .NET (skip everything else)
 
 ```bash
-pipeline-guard --only dotnet
+pipewarden --only dotnet
 ```
 
 #### Combine secrets + .NET (good for pre-push hooks)
 
 ```bash
-pipeline-guard --only secrets --only dotnet
+pipewarden --only secrets --only dotnet
 ```
 
 #### Full config for a .NET microservice
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 fail_fast = false
 
 [stages]
@@ -1353,17 +1353,17 @@ Configure feeds in `NuGet.config` at the solution root using environment variabl
 </configuration>
 ```
 
-In GitHub Actions, set the environment variables before running Pipeline Guard:
+In GitHub Actions, set the environment variables before running Pipewarden:
 
 ```yaml
-- name: Run Pipeline Guard
+- name: Run Pipewarden
   env:
     NUGET_USERNAME: ${{ github.actor }}
     NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  run: pipeline-guard --junit-out junit.xml
+  run: pipewarden --junit-out junit.xml
 ```
 
-Pipeline Guard passes your environment variables through to `dotnet restore` automatically — no extra configuration in `.pipeline-guard.toml` needed.
+Pipewarden passes your environment variables through to `dotnet restore` automatically — no extra configuration in `.pipewarden.toml` needed.
 
 #### Pinning the .NET SDK Version
 
@@ -1378,11 +1378,11 @@ To ensure everyone (local and CI) builds with the same SDK version, add a `globa
 }
 ```
 
-Pipeline Guard respects `global.json` — it does not override or replace the SDK selection.
+Pipewarden respects `global.json` — it does not override or replace the SDK selection.
 
 #### Multiple .NET SDK Versions in CI
 
-In GitHub Actions, install all required SDK versions before running Pipeline Guard:
+In GitHub Actions, install all required SDK versions before running Pipewarden:
 
 ```yaml
 - uses: actions/setup-dotnet@v4
@@ -1390,15 +1390,15 @@ In GitHub Actions, install all required SDK versions before running Pipeline Gua
     dotnet-version: |
       8.0.x
       9.0.x
-- run: pip install pipeline-guard
-- run: pipeline-guard
+- run: pip install pipewarden
+- run: pipewarden
 ```
 
 Both SDKs are available on the PATH. `global.json` controls which one `dotnet` uses.
 
 #### Nullable Reference Types and Warnings-as-Errors
 
-If your `.csproj` has `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` or `<Nullable>enable</Nullable>`, compiler warnings become build errors. Pipeline Guard surfaces these clearly:
+If your `.csproj` has `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` or `<Nullable>enable</Nullable>`, compiler warnings become build errors. Pipewarden surfaces these clearly:
 
 ```
 ── dotnet:build ──
@@ -1409,14 +1409,14 @@ These are real type safety issues. Fix them rather than suppressing them — thi
 
 #### Running dotnet test with Specific Filters
 
-Pipeline Guard runs `dotnet test` without filters (all tests). If you want to run only a subset, use `--only dotnet` is not granular enough for test filtering. In that case, skip the Pipeline Guard dotnet stage and add a custom step in your CI:
+Pipewarden runs `dotnet test` without filters (all tests). If you want to run only a subset, use `--only dotnet` is not granular enough for test filtering. In that case, skip the Pipewarden dotnet stage and add a custom step in your CI:
 
 ```yaml
-- run: pipeline-guard --skip dotnet --junit-out infra-junit.xml
+- run: pipewarden --skip dotnet --junit-out infra-junit.xml
 - run: dotnet test --filter "Category=Unit" --nologo
 ```
 
-This lets Pipeline Guard handle secrets, linting, and Docker while you control test selection manually.
+This lets Pipewarden handle secrets, linting, and Docker while you control test selection manually.
 
 ---
 
@@ -1424,19 +1424,19 @@ This lets Pipeline Guard handle secrets, linting, and Docker while you control t
 
 ```bash
 # Full check — detects solution, runs restore → build → test
-pipeline-guard
+pipewarden
 
 # .NET only (skip secrets, Docker, etc.)
-pipeline-guard --only dotnet
+pipewarden --only dotnet
 
 # Stop on first failure (tight feedback loop while debugging)
-pipeline-guard --only dotnet --fail-fast
+pipewarden --only dotnet --fail-fast
 
 # Run against a specific subdirectory (monorepo)
-pipeline-guard --root ./services/payment-service
+pipewarden --root ./services/payment-service
 
 # Generate JUnit results for a local IDE test report
-pipeline-guard --only dotnet --junit-out results.xml
+pipewarden --only dotnet --junit-out results.xml
 ```
 
 ---
@@ -1450,10 +1450,10 @@ pipeline-guard --only dotnet --junit-out results.xml
 | `dotnet:restore` fails — `No executable found matching command 'dotnet'` | .NET SDK not installed | Install from https://dotnet.microsoft.com/download |
 | `dotnet:build` fails — `The framework 'net9.0' was not found` | Wrong SDK version | Install the required SDK; or add `global.json` to pin the version |
 | `dotnet:test` shows 0 tests found | No test framework reference in any project | Add `xunit` / `NUnit` / `MSTest` to a test project `.csproj` |
-| `dotnet:test` times out | Large test suite | Increase `test_s` in `.pipeline-guard.toml` |
+| `dotnet:test` times out | Large test suite | Increase `test_s` in `.pipewarden.toml` |
 | Build succeeds locally, fails in CI | SDK version mismatch between local and CI | Add `global.json` to pin the SDK version |
 | Many nullable warnings → build fails | `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` is set | Fix the null safety issues, or suppress specific warnings with `<NoWarn>CS8600</NoWarn>` |
-| `dotnet:restore` is slow | No NuGet package cache in CI | Add a cache step before Pipeline Guard in your CI YAML |
+| `dotnet:restore` is slow | No NuGet package cache in CI | Add a cache step before Pipewarden in your CI YAML |
 
 ---
 
@@ -1500,7 +1500,7 @@ gitleaks installed?
 Sometimes you have known test fixtures or documentation examples that look like secrets. Allowlist them:
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 [secrets]
 # Skip specific files or folders
 allowlist_paths = [
@@ -1593,7 +1593,7 @@ Exit Code  Meaning
     2      Bad CLI usage (unknown flag, invalid argument).
            Usually a configuration error in your workflow file.
 
-    3      Bad .pipeline-guard.toml file (unknown key, wrong type).
+    3      Bad .pipewarden.toml file (unknown key, wrong type).
            Fix your config file.
 
   130      Interrupted (Ctrl-C).
@@ -1604,12 +1604,12 @@ Exit Code  Meaning
 
 ## 📄 Reports — SARIF, JUnit XML, JSON
 
-Pipeline Guard can generate three machine-readable report formats simultaneously. These are designed to integrate with the dashboards and UIs your team already uses.
+Pipewarden can generate three machine-readable report formats simultaneously. These are designed to integrate with the dashboards and UIs your team already uses.
 
 ### SARIF — Security Findings in GitHub / Azure DevOps
 
 ```bash
-pipeline-guard --sarif-out report.sarif
+pipewarden --sarif-out report.sarif
 ```
 
 **What is SARIF?**
@@ -1636,7 +1636,7 @@ Each alert can be dismissed with a reason, assigned to a team member, or linked 
 ### JUnit XML — Test Results in CI Dashboards
 
 ```bash
-pipeline-guard --junit-out junit.xml
+pipewarden --junit-out junit.xml
 ```
 
 **What is JUnit XML?**
@@ -1659,7 +1659,7 @@ Test results for this pipeline:   ✓ 8 passed   ✗ 1 failed   · 2 skipped
 ### JSON — For Custom Integrations
 
 ```bash
-pipeline-guard --json
+pipewarden --json
 ```
 
 Outputs a structured JSON document to stdout (suppresses all pretty output):
@@ -1701,10 +1701,10 @@ Use this for:
 
 ## 🔧 Configuration Reference
 
-Drop a `.pipeline-guard.toml` file at the root of your repository to customise behaviour. **All keys are optional** — the defaults work out of the box.
+Drop a `.pipewarden.toml` file at the root of your repository to customise behaviour. **All keys are optional** — the defaults work out of the box.
 
 ```toml
-# .pipeline-guard.toml
+# .pipewarden.toml
 # ─────────────────────────────────────────────────────────────────────────────
 # TOP-LEVEL SETTINGS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1714,10 +1714,10 @@ Drop a `.pipeline-guard.toml` file at the root of your repository to customise b
 fail_fast = false
 
 # Docker image tag used when building. Override to match your project's tag.
-docker_tag = "pipeline-guard-local:latest"
+docker_tag = "pipewarden-local:latest"
 
 # Run ONLY these stages (all others are skipped).
-# Useful for: pipeline-guard --only secrets,python
+# Useful for: pipewarden --only secrets,python
 only = []
 
 # Always skip these stages.
@@ -1790,7 +1790,7 @@ quiet = false   # Set to true to suppress all pretty output (use with --json)
 The config file is **strictly validated**. If you type an unknown key, you get an immediate error:
 
 ```
-config error: unknown key: pipeline-guard.stagess
+config error: unknown key: pipewarden.stagess
 ```
 
 This is intentional — typos fail loudly rather than being silently ignored.
@@ -1826,11 +1826,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Pipeline Guard
-        run: pip install pipeline-guard
+      - name: Install Pipewarden
+        run: pip install pipewarden
 
-      - name: Run Pipeline Guard
-        run: pipeline-guard --sarif-out report.sarif --junit-out junit.xml
+      - name: Run Pipewarden
+        run: pipewarden --sarif-out report.sarif --junit-out junit.xml
 
       - name: Upload security findings to GitHub
         uses: github/codeql-action/upload-sarif@v3
@@ -1842,7 +1842,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pipeline-guard-results
+          name: pipewarden-results
           path: |
             junit.xml
             report.sarif
@@ -1852,12 +1852,12 @@ jobs:
 
 ```yaml
 # .gitlab-ci.yml
-pipeline-guard:
+pipewarden:
   image: python:3.12-slim
   before_script:
-    - pip install pipeline-guard
+    - pip install pipewarden
   script:
-    - pipeline-guard --junit-out junit.xml --sarif-out report.sarif
+    - pipewarden --junit-out junit.xml --sarif-out report.sarif
   artifacts:
     when: always
     reports:
@@ -1879,8 +1879,8 @@ pipeline {
     stages {
         stage('Quality Gate') {
             steps {
-                sh 'pip install pipeline-guard'
-                sh 'pipeline-guard --junit-out junit.xml --sarif-out report.sarif'
+                sh 'pip install pipewarden'
+                sh 'pipewarden --junit-out junit.xml --sarif-out report.sarif'
             }
             post {
                 always {
@@ -1908,11 +1908,11 @@ steps:
     inputs:
       versionSpec: '3.12'
 
-  - script: pip install pipeline-guard
-    displayName: Install Pipeline Guard
+  - script: pip install pipewarden
+    displayName: Install Pipewarden
 
-  - script: pipeline-guard --junit-out $(Build.ArtifactStagingDirectory)/junit.xml
-    displayName: Run Pipeline Guard
+  - script: pipewarden --junit-out $(Build.ArtifactStagingDirectory)/junit.xml
+    displayName: Run Pipewarden
 
   - task: PublishTestResults@2
     inputs:
@@ -1934,11 +1934,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Pipeline Guard
-          command: pip install pipeline-guard
+          name: Install Pipewarden
+          command: pip install pipewarden
       - run:
-          name: Run Pipeline Guard
-          command: pipeline-guard --junit-out test-results/junit.xml
+          name: Run Pipewarden
+          command: pipewarden --junit-out test-results/junit.xml
       - store_test_results:
           path: test-results
 ```
@@ -1950,8 +1950,8 @@ jobs:
 If your workflow already uses GitHub Actions, there is a dedicated action you can use with a single step:
 
 ```yaml
-- name: Run Pipeline Guard
-  uses: gcfernando/pipeline-guard@v1
+- name: Run Pipewarden
+  uses: gcfernando/pipewarden@v1
   with:
     sarif-out: report.sarif
     junit-out: junit.xml
@@ -1969,25 +1969,25 @@ If your workflow already uses GitHub Actions, there is a dedicated action you ca
 | `junit-out` | *(none)* | Path to write JUnit XML report |
 | `diff` | *(none)* | Restrict secret scan to files changed vs this ref |
 | `python-version` | `3.12` | Python version to use for the tool itself |
-| `version` | *(latest)* | Specific pipeline-guard version to install |
+| `version` | *(latest)* | Specific pipewarden version to install |
 
 ---
 
 ## 🪝 Pre-Commit Hooks
 
-Catch issues **before** code even reaches the remote repository by wiring Pipeline Guard into your local commit and push workflow.
+Catch issues **before** code even reaches the remote repository by wiring Pipewarden into your local commit and push workflow.
 
 ### Setup
 
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/gcfernando/pipeline-guard
+  - repo: https://github.com/gcfernando/pipewarden
     rev: v1.0.0
     hooks:
-      - id: pipeline-guard-secrets     # Runs on every git commit
-      - id: pipeline-guard-diff        # Runs on every git push (changed files only)
-      # - id: pipeline-guard-full      # Full run (use manually: pre-commit run pipeline-guard-full)
+      - id: pipewarden-secrets     # Runs on every git commit
+      - id: pipewarden-diff        # Runs on every git push (changed files only)
+      # - id: pipewarden-full      # Full run (use manually: pre-commit run pipewarden-full)
 ```
 
 ```bash
@@ -1999,9 +1999,9 @@ pre-commit install --hook-type pre-push   # Hook runs on every push
 
 | Hook ID | When it runs | What it does |
 |---------|-------------|--------------|
-| `pipeline-guard-secrets` | Every `git commit` | Scans ALL files for secrets. Fast (~0.1s). |
-| `pipeline-guard-diff` | Every `git push` | Scans only files changed vs `origin/main`. Very fast. |
-| `pipeline-guard-full` | Manual only | Full pipeline: install, lint, test, build, scan. |
+| `pipewarden-secrets` | Every `git commit` | Scans ALL files for secrets. Fast (~0.1s). |
+| `pipewarden-diff` | Every `git push` | Scans only files changed vs `origin/main`. Very fast. |
+| `pipewarden-full` | Manual only | Full pipeline: install, lint, test, build, scan. |
 
 ### The Workflow With Pre-Commit Hooks
 
@@ -2010,17 +2010,17 @@ Developer writes code
        ↓
 git commit
        ↓
-[pipeline-guard-secrets runs automatically]  ← catches AWS keys, tokens, passwords
+[pipewarden-secrets runs automatically]  ← catches AWS keys, tokens, passwords
        ↓  (passes)
 Commit created locally
        ↓
 git push
        ↓
-[pipeline-guard-diff runs automatically]     ← scans changed files again
+[pipewarden-diff runs automatically]     ← scans changed files again
        ↓  (passes)
 Code reaches remote repository
        ↓
-CI runs full pipeline-guard
+CI runs full pipewarden
        ↓  (passes)
 Pull request can be merged
 ```
@@ -2034,14 +2034,14 @@ No secret ever reaches the server. No broken code is ever deployed.
 ### All Commands
 
 ```
-pipeline-guard [OPTIONS]
+pipewarden [OPTIONS]
 
   Run against the current directory (all detected languages).
 
 OPTIONS
 
   --root PATH          Project root to scan (default: current directory)
-  --config FILE        Path to .pipeline-guard.toml (default: auto-discover)
+  --config FILE        Path to .pipewarden.toml (default: auto-discover)
 
   --only STAGE         Run only this stage — repeatable
                        Example: --only secrets --only python
@@ -2079,40 +2079,40 @@ vulns      Dependency vulnerability scanning (pip-audit / npm audit / cargo-audi
 
 ```bash
 # Run everything
-pipeline-guard
+pipewarden
 
 # Run only secret scanning (fastest — good for pre-commit)
-pipeline-guard --only secrets
+pipewarden --only secrets
 
 # Run only secrets and Python
-pipeline-guard --only secrets --only python
+pipewarden --only secrets --only python
 
 # Skip Docker (no daemon available)
-pipeline-guard --skip docker
+pipewarden --skip docker
 
 # Skip Docker and vuln scanning
-pipeline-guard --skip docker --skip vulns
+pipewarden --skip docker --skip vulns
 
 # Only scan changed files vs main branch
-pipeline-guard --only secrets --diff origin/main
+pipewarden --only secrets --diff origin/main
 
 # Stop on first failure (tight feedback loop)
-pipeline-guard --fail-fast
+pipewarden --fail-fast
 
 # Generate all reports
-pipeline-guard --sarif-out findings.sarif --junit-out results.xml --json > report.json
+pipewarden --sarif-out findings.sarif --junit-out results.xml --json > report.json
 
 # Run against a specific directory
-pipeline-guard --root /path/to/my-project
+pipewarden --root /path/to/my-project
 
 # Plain text output (no colours)
-pipeline-guard --no-color
+pipewarden --no-color
 
 # Verbose debug output
-pipeline-guard --verbose
+pipewarden --verbose
 
 # Use a custom config file
-pipeline-guard --config /path/to/custom.toml
+pipewarden --config /path/to/custom.toml
 ```
 
 ---
@@ -2121,20 +2121,20 @@ pipeline-guard --config /path/to/custom.toml
 
 ### Security Risk Reduction
 
-| Risk | Without Pipeline Guard | With Pipeline Guard |
+| Risk | Without Pipewarden | With Pipewarden |
 |------|----------------------|---------------------|
 | Leaked AWS credentials | Found in production breach, months later | Blocked at commit, seconds after typing |
 | Vulnerable dependencies | Discovered in quarterly security audit | Flagged on every PR by pip-audit / npm audit |
 | Security findings in logs | Buried in CI output, never triaged | Tracked as GitHub Code Scanning alerts with assignment + dismissal workflow |
 
-**Industry data:** The average cost of a data breach from an exposed credential is $4.45 million (IBM, 2023). Pipeline Guard prevents the most common source of credential exposure: accidental commits.
+**Industry data:** The average cost of a data breach from an exposed credential is $4.45 million (IBM, 2023). Pipewarden prevents the most common source of credential exposure: accidental commits.
 
 ### Developer Productivity
 
 | Metric | Impact |
 |--------|--------|
 | CI setup time for new project | Reduced from hours to minutes |
-| Onboarding new engineers | No "how does our CI work?" question — it's always `pipeline-guard` |
+| Onboarding new engineers | No "how does our CI work?" question — it's always `pipewarden` |
 | Context switching | Developers see failures in the same format regardless of language |
 | Debugging failed pipelines | Last 60 lines printed automatically — no log archaeology |
 
@@ -2152,7 +2152,7 @@ pipeline-guard --config /path/to/custom.toml
 
 > *"We went from 12 different CI YAML files across our repositories to one standard tool. Our new engineers ship their first PR on day one instead of day three."*
 
-> *"We caught a Stripe live key in a commit 30 seconds after it was typed. Before Pipeline Guard, it would have been in our git history for months before anyone noticed."*
+> *"We caught a Stripe live key in a commit 30 seconds after it was typed. Before Pipewarden, it would have been in our git history for months before anyone noticed."*
 
 > *"SARIF integration means security findings now have owners and SLAs, not just log lines that no one reads."*
 
@@ -2160,23 +2160,23 @@ pipeline-guard --config /path/to/custom.toml
 
 ## ❓ Frequently Asked Questions
 
-**Q: I have no `.pipeline-guard.toml` file. Will it still work?**
+**Q: I have no `.pipewarden.toml` file. Will it still work?**
 A: Yes. All configuration has sensible defaults. The tool detects your project type automatically and uses best-practice settings. A config file is only needed if you want to override something.
 
 ---
 
 **Q: My project uses Python AND Node.js. Which one runs?**
-A: Both. Pipeline Guard detects all languages present and runs each in sequence. The summary shows every step from all languages.
+A: Both. Pipewarden detects all languages present and runs each in sequence. The summary shows every step from all languages.
 
 ---
 
 **Q: What if I don't have pytest / ruff / mypy installed?**
-A: For Python, Pipeline Guard creates an isolated virtual environment and checks whether pytest is installed inside it. If not, it reports a `warned` step (not a failure) and continues. Optional tools like mypy are only run if you have them installed AND have a config file for them.
+A: For Python, Pipewarden creates an isolated virtual environment and checks whether pytest is installed inside it. If not, it reports a `warned` step (not a failure) and continues. Optional tools like mypy are only run if you have them installed AND have a config file for them.
 
 ---
 
 **Q: Will it delete my existing virtual environment?**
-A: No. If a `.pipeline-guard-venv` folder already exists, it reuses it. It only creates a new one if none exists.
+A: No. If a `.pipewarden-venv` folder already exists, it reuses it. It only creates a new one if none exists.
 
 ---
 
@@ -2197,7 +2197,7 @@ allowlist_strings = ["AKIAIOSFODNN7EXAMPLE"]
 **Q: Can I run only the secret scanner without running tests?**
 A: Yes:
 ```bash
-pipeline-guard --only secrets
+pipewarden --only secrets
 ```
 
 ---
@@ -2222,7 +2222,7 @@ A: No. If `ruff` is not on your PATH, the lint step is recorded as `warned` (not
 ---
 
 **Q: How is this different from running all the tools manually?**
-A: Pipeline Guard provides:
+A: Pipewarden provides:
 - **Automatic detection** — you don't need to know which tools apply
 - **Consistent output** — one summary format regardless of language
 - **Timeouts on every command** — no hanging pipelines
@@ -2263,7 +2263,7 @@ You may use, modify, and distribute this software freely, including in commercia
 
 <br>
 
-⭐ **If Pipeline Guard saves you time, consider starring the repository.**
+⭐ **If Pipewarden saves you time, consider starring the repository.**
 
 <br>
 

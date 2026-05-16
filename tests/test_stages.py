@@ -13,9 +13,9 @@ from unittest.mock import patch
 
 import pytest
 
-from pipeline_guard.config import PipelineConfig
-from pipeline_guard.detect import Detection
-from pipeline_guard.stages import (
+from pipewarden.config import PipelineConfig
+from pipewarden.detect import Detection
+from pipewarden.stages import (
     run_docker,
     run_dotnet,
     run_go,
@@ -24,7 +24,7 @@ from pipeline_guard.stages import (
     run_rust,
     run_vulns,
 )
-from pipeline_guard.types import Status, StepResult
+from pipewarden.types import Status, StepResult
 
 # ---------------------------------------------------------------------------
 # Recording mock for run_cmd
@@ -80,8 +80,8 @@ def recorder() -> CallRecorder:
 
 
 def _patch_stage(module_attr: str, recorder: CallRecorder) -> Any:
-    """Patch `run_cmd` inside `pipeline_guard.stages`."""
-    return patch(f"pipeline_guard.stages.{module_attr}", recorder)
+    """Patch `run_cmd` inside `pipewarden.stages`."""
+    return patch(f"pipewarden.stages.{module_attr}", recorder)
 
 
 # ---------------------------------------------------------------------------
@@ -266,7 +266,7 @@ def test_rust_dep_failure_stops(
 def test_docker_build_without_hadolint(
     tmp_project: Path, cfg: PipelineConfig, recorder: CallRecorder
 ) -> None:
-    with patch("pipeline_guard.stages.shutil.which", return_value=None):
+    with patch("pipewarden.stages.shutil.which", return_value=None):
         results: list[StepResult] = []
         with _patch_stage("run_cmd", recorder):
             run_docker(tmp_project, Detection(docker=True), cfg, results)
@@ -278,7 +278,7 @@ def test_docker_build_without_hadolint(
 def test_docker_build_with_hadolint(
     tmp_project: Path, cfg: PipelineConfig, recorder: CallRecorder
 ) -> None:
-    with patch("pipeline_guard.stages.shutil.which",
+    with patch("pipewarden.stages.shutil.which",
                side_effect=lambda x: x if x == "hadolint" else None):
         results: list[StepResult] = []
         with _patch_stage("run_cmd", recorder):
@@ -297,7 +297,7 @@ def test_vulns_no_scanners_available(
     tmp_project: Path, cfg: PipelineConfig, recorder: CallRecorder
 ) -> None:
     # No scanners on PATH → we expect a single SKIPPED step.
-    with patch("pipeline_guard.stages.shutil.which", return_value=None):
+    with patch("pipewarden.stages.shutil.which", return_value=None):
         results: list[StepResult] = []
         with _patch_stage("run_cmd", recorder):
             run_vulns(tmp_project, Detection(python=True, node=True), cfg, results)

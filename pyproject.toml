@@ -3,14 +3,14 @@ requires = ["hatchling>=1.18"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pipeline-guard"
+name = "pipewarden"
 version = "1.0.0"
-description = "Detect, install, lint, test, build, scan — locally or in CI. Free and open."
+description = "Pipewarden — detect, install, lint, test, build, scan — locally or in CI. Free and open."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [{ name = "Gehan Fernando", email = "f.gehan@gmail.com" }]
-keywords = ["ci", "devops", "secret-scanning", "lint", "test", "build"]
+keywords = ["ci", "devops", "secret-scanning", "lint", "test", "build", "pipewarden"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -42,20 +42,20 @@ dev = [
 ]
 
 [project.scripts]
-pipeline-guard = "pipeline_guard.cli:main"
+pipewarden = "pipewarden.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/gcfernando/pipeline-guard"
-Source   = "https://github.com/gcfernando/pipeline-guard"
-Issues   = "https://github.com/gcfernando/pipeline-guard/issues"
-Changelog = "https://github.com/gcfernando/pipeline-guard/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/gcfernando/pipewarden"
+Source   = "https://github.com/gcfernando/pipewarden"
+Issues   = "https://github.com/gcfernando/pipewarden/issues"
+Changelog = "https://github.com/gcfernando/pipewarden/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pipeline_guard"]
+packages = ["src/pipewarden"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "src/pipeline_guard",
+    "src/pipewarden",
     "tests",
     "README.md",
     "LICENSE",
@@ -81,7 +81,7 @@ python_version = "3.10"
 strict = true
 warn_unused_ignores = true
 warn_redundant_casts = true
-files = ["src/pipeline_guard"]
+files = ["src/pipewarden"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -89,9 +89,9 @@ addopts = "-q --strict-markers"
 filterwarnings = ["error"]
 
 [tool.coverage.run]
-source = ["pipeline_guard"]
+source = ["pipewarden"]
 branch = true
-omit = ["src/pipeline_guard/__main__.py"]
+omit = ["src/pipewarden/__main__.py"]
 
 [tool.coverage.report]
 fail_under = 80

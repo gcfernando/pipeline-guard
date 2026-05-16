@@ -28,9 +28,9 @@ jobs:
       - name: Type-check
         run: mypy
       - name: Test
-        run: pytest --cov=pipeline_guard --cov-report=xml --junit-xml=junit.xml
+        run: pytest --cov=pipewarden --cov-report=xml --junit-xml=junit.xml
       - name: Self-Test (eat our own dog food)
-        run: pipeline-guard --root . --skip vulns --junit-out self-junit.xml
+        run: pipewarden --root . --skip vulns --junit-out self-junit.xml
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
         uses: actions/upload-artifact@v4

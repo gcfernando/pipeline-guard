@@ -1,8 +1,8 @@
 import json
 from xml.etree import ElementTree as ET
 
-from pipeline_guard.reporters import to_json, to_junit_xml, to_sarif
-from pipeline_guard.types import Finding, Report, Severity, Status, StepResult
+from pipewarden.reporters import to_json, to_junit_xml, to_sarif
+from pipewarden.types import Finding, Report, Severity, Status, StepResult
 
 
 def _sample_report() -> Report:
@@ -38,7 +38,7 @@ def test_sarif_well_formed() -> None:
     rep = _sample_report()
     data = json.loads(to_sarif(rep))
     assert data["version"] == "2.1.0"
-    assert data["runs"][0]["tool"]["driver"]["name"] == "pipeline-guard"
+    assert data["runs"][0]["tool"]["driver"]["name"] == "pipewarden"
     results = data["runs"][0]["results"]
     assert len(results) == 1
     assert results[0]["ruleId"] == "aws.access_key"

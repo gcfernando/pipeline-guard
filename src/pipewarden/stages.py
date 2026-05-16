@@ -45,7 +45,7 @@ def _pyproject_has_section(root: Path, dotted: str) -> bool:
 
 def run_python(root: Path, d: Detection, cfg: PipelineConfig,
                results: list[StepResult]) -> None:
-    venv = root / ".pipeline-guard-venv"
+    venv = root / ".pipewarden-venv"
     py = sys.executable
 
     if not venv.exists():
