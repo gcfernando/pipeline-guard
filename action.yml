@@ -1,0 +1,84 @@
+name: "Pipeline Guard"
+description: "Detect, install, lint, test, build, scan — locally or in CI."
+author: "Pipeline Guard contributors"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  root:
+    description: "Project root to scan."
+    required: false
+    default: "."
+  only:
+    description: "Comma-separated list of stages to run (e.g. 'secrets,python')."
+    required: false
+    default: ""
+  skip:
+    description: "Comma-separated list of stages to skip."
+    required: false
+    default: ""
+  fail-fast:
+    description: "Abort on first failure."
+    required: false
+    default: "false"
+  sarif-out:
+    description: "Path to write SARIF report to (for code-scanning upload)."
+    required: false
+    default: ""
+  junit-out:
+    description: "Path to write JUnit XML report to."
+    required: false
+    default: ""
+  diff:
+    description: "Restrict secret scan to files changed vs this ref."
+    required: false
+    default: ""
+  python-version:
+    description: "Python interpreter to use for pipeline-guard itself."
+    required: false
+    default: "3.12"
+  version:
+    description: "pipeline-guard version to install (e.g. '1.0.0'). Default: latest."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install pipeline-guard
+      shell: bash
+      run: |
+        if [[ -n "${{ inputs.version }}" ]]; then
+          python -m pip install --quiet "pipeline-guard==${{ inputs.version }}"
+        else
+          python -m pip install --quiet pipeline-guard
+        fi
+
+    - name: Run pipeline-guard
+      shell: bash
+      env:
+        ROOT: ${{ inputs.root }}
+        ONLY: ${{ inputs.only }}
+        SKIP: ${{ inputs.skip }}
+        FAIL_FAST: ${{ inputs.fail-fast }}
+        SARIF: ${{ inputs.sarif-out }}
+        JUNIT: ${{ inputs.junit-out }}
+        DIFF: ${{ inputs.diff }}
+      run: |
+        set -euo pipefail
+        args=( "--root" "$ROOT" "--no-color" )
+        IFS=','
+        for s in $ONLY; do args+=( "--only" "$s" ); done
+        for s in $SKIP; do args+=( "--skip" "$s" ); done
+        unset IFS
+        [[ "$FAIL_FAST" == "true" ]] && args+=( "--fail-fast" )
+        [[ -n "$SARIF" ]] && args+=( "--sarif-out" "$SARIF" )
+        [[ -n "$JUNIT" ]] && args+=( "--junit-out" "$JUNIT" )
+        [[ -n "$DIFF"  ]] && args+=( "--diff" "$DIFF" )
+        pipeline-guard "${args[@]}"

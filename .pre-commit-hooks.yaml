@@ -1,0 +1,34 @@
+# Allow consumers to use this repo as a pre-commit hook source:
+#
+#   - repo: https://github.com/example/pipeline-guard
+#     rev: v1.0.0
+#     hooks:
+#       - id: pipeline-guard-secrets
+#       - id: pipeline-guard-diff
+#
+- id: pipeline-guard-secrets
+  name: pipeline-guard (secrets only)
+  description: Scan staged files for committed secrets.
+  entry: pipeline-guard --only secrets --no-color
+  language: python
+  pass_filenames: false
+  always_run: true
+  stages: [pre-commit, pre-push]
+
+- id: pipeline-guard-diff
+  name: pipeline-guard (changed files only)
+  description: Fast pre-push check — scans files changed vs origin/main.
+  entry: pipeline-guard --only secrets --diff origin/main --no-color
+  language: python
+  pass_filenames: false
+  always_run: true
+  stages: [pre-push]
+
+- id: pipeline-guard-full
+  name: pipeline-guard (full)
+  description: Full local CI run. Slower; use sparingly.
+  entry: pipeline-guard --no-color
+  language: python
+  pass_filenames: false
+  always_run: true
+  stages: [manual]

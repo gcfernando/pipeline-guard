@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pipeline-guard"
+version = "1.0.0"
+description = "Detect, install, lint, test, build, scan — locally or in CI. Free and open."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "Pipeline Guard contributors" }]
+keywords = ["ci", "devops", "secret-scanning", "lint", "test", "build"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Security",
+]
+# Zero runtime dependencies on purpose. The whole point is "drop into any CI."
+dependencies = [
+    'tomli>=2.0;python_version<"3.11"',
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "mypy>=1.7",
+    "ruff>=0.1.6",
+    "build>=1.0",
+]
+
+[project.scripts]
+pipeline-guard = "pipeline_guard.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/example/pipeline-guard"
+Source   = "https://github.com/example/pipeline-guard"
+Issues   = "https://github.com/example/pipeline-guard/issues"
+Changelog = "https://github.com/example/pipeline-guard/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pipeline_guard"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/pipeline_guard",
+    "tests",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "pyproject.toml",
+]
+
+# ---------------------------------------------------------------------------
+# Tooling configuration
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# Conservative set — we eat our own dog food.
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501"]  # line-length is enforced by formatter
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+files = ["src/pipeline_guard"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["pipeline_guard"]
+branch = true
+omit = ["src/pipeline_guard/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "# pragma: no cover",
+]
