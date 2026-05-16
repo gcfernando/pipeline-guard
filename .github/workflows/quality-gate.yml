@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  Test:
     strategy:
       fail-fast: false
       matrix:
@@ -29,7 +29,7 @@ jobs:
         run: mypy
       - name: Test
         run: pytest --cov=pipeline_guard --cov-report=xml --junit-xml=junit.xml
-      - name: Self-test (eat our own dog food)
+      - name: Self-Test (eat our own dog food)
         run: pipeline-guard --root . --skip vulns --junit-out self-junit.xml
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
