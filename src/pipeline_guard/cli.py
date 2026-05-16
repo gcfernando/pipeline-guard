@@ -6,6 +6,7 @@ import logging
 import signal
 import sys
 import time
+from io import TextIOWrapper
 from pathlib import Path
 
 from . import __version__
@@ -120,8 +121,8 @@ def main(argv: list[str] | None = None) -> int:
 
     # Ensure UTF-8 output on Windows where the default encoding may be cp1252.
     for _stream in (sys.stdout, sys.stderr):
-        if hasattr(_stream, "reconfigure"):
-            _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        if isinstance(_stream, TextIOWrapper):
+            _stream.reconfigure(encoding="utf-8", errors="replace")
 
     root: Path = args.root.resolve()
     if not root.is_dir():

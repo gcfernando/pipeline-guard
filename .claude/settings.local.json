@@ -12,7 +12,10 @@
       "Bash(python -m pip install -e \".[dev]\" -q)",
       "Bash(python -m pytest tests/test_runner.py::test_timeout_kills_process -v)",
       "Bash(python -m pytest tests/test_cli.py::test_invoked_as_module -v)",
-      "Bash(python -m pytest --cov=pipeline_guard --cov-report=term-missing -q)"
+      "Bash(python -m pytest --cov=pipeline_guard --cov-report=term-missing -q)",
+      "Bash(python -m mypy src/pipeline_guard/cli.py)",
+      "Bash(python -m mypy src/pipeline_guard)",
+      "Bash(python -m pytest tests/test_cli.py::test_invoked_as_module -q)"
     ]
   }
 }
