@@ -24,6 +24,32 @@
 
 ---
 
+## ⚡ 30-Second Quick Start
+
+```bash
+pip install pipewarden   # one-time install
+cd your-project
+pipewarden               # run in any project — no config needed
+```
+
+Pipewarden automatically figures out what kind of project you have and runs everything in the right order. You will see a summary like this:
+
+```
+✓ secrets:fallback    passed    0.1s   scanned 34 files, no secrets
+✓ py:deps(pyproject)  passed    4.1s
+✓ py:lint(ruff)       passed    0.3s
+✓ py:test(pytest)     passed    6.2s
+✓ all 4 steps passed in 10.7s
+```
+
+**Reading the result at a glance:**
+- `✓` = passed — nothing to do
+- `✗` = failed — the full error is printed below the summary
+- `⚠` = warned — an optional tool is missing, pipeline continues
+- Exit `0` = all good. Exit `1` = something failed. Exit `4` = a **secret was found** — rotate it immediately.
+
+---
+
 ## 📖 Table of Contents
 
 | # | Section |
@@ -36,18 +62,20 @@
 | 6 | [How It Works — The 6 Stages](#-how-it-works--the-6-stages) |
 | 7 | [Python Projects — Complete Guide](#-python-projects--complete-guide) |
 | 8 | [.NET Projects — Complete Guide](#-net-projects--complete-guide) |
-| 9 | [Secret Scanning Deep Dive](#-secret-scanning-deep-dive) |
-| 10 | [Reading the Output](#-reading-the-output) |
-| 11 | [Reports — SARIF, JUnit XML, JSON, Markdown](#-reports--sarif-junit-xml-json-markdown) |
-| 12 | [Configuration Reference](#-configuration-reference) |
-| 13 | [Environment Variable Overrides](#-environment-variable-overrides) |
-| 14 | [CI / CD Integration](#-ci--cd-integration) |
-| 15 | [GitHub Actions (Official Action)](#-github-actions-official-action) |
-| 16 | [Pre-Commit Hooks](#-pre-commit-hooks) |
-| 17 | [CLI Reference](#-cli-reference) |
-| 18 | [Business Benefits & ROI](#-business-benefits--roi) |
-| 19 | [Frequently Asked Questions](#-frequently-asked-questions) |
-| 20 | [Contributing](#-contributing) |
+| 9 | [Node.js / Go / Rust — Quick Guides](#-nodejs--go--rust--quick-guides) |
+| 10 | [Secret Scanning Deep Dive](#-secret-scanning-deep-dive) |
+| 11 | [What To Do When Secrets Are Found](#-what-to-do-when-secrets-are-found) |
+| 12 | [Reading the Output](#-reading-the-output) |
+| 13 | [Reports — SARIF, JUnit XML, JSON, Markdown](#-reports--sarif-junit-xml-json-markdown) |
+| 14 | [Configuration Reference](#-configuration-reference) |
+| 15 | [Environment Variable Overrides](#-environment-variable-overrides) |
+| 16 | [CI / CD Integration](#-ci--cd-integration) |
+| 17 | [GitHub Actions (Official Action)](#-github-actions-official-action) |
+| 18 | [Pre-Commit Hooks](#-pre-commit-hooks) |
+| 19 | [CLI Reference](#-cli-reference) |
+| 20 | [Business Benefits & ROI](#-business-benefits--roi) |
+| 21 | [Frequently Asked Questions](#-frequently-asked-questions) |
+| 22 | [Contributing](#-contributing) |
 
 ---
 
@@ -321,14 +349,39 @@ package-lock.json?  → uses npm ci
 
 When the `vulns` stage is enabled, Pipewarden runs dependency vulnerability scans using whichever tools are installed:
 
-| Tool | Language | What it scans |
-|------|----------|---------------|
-| `pip-audit` | Python | PyPI packages against OSV / PyPA advisory databases |
-| `npm audit` | Node | npm registry security advisories |
-| `cargo-audit` | Rust | RustSec advisory database |
-| `govulncheck` | Go | Go vulnerability database |
+| Tool | Language | What it scans | Install |
+|------|----------|---------------|---------|
+| `pip-audit` | Python | PyPI packages against OSV / PyPA advisory databases | `pip install pip-audit` |
+| `npm audit` | Node | npm registry security advisories | built into npm |
+| `cargo-audit` | Rust | RustSec advisory database | `cargo install cargo-audit` |
+| `govulncheck` | Go | Go vulnerability database | `go install golang.org/x/vuln/cmd/govulncheck@latest` |
 
 If none of these tools are installed, the stage is **skipped** — it never blocks your pipeline for a missing optional tool.
+
+#### What a Vulnerability Finding Looks Like
+
+```console
+✗ vulns:pip-audit (4.2s)
+
+── vulns:pip-audit ──
+cryptography 41.0.0
+  ID:       GHSA-jfh8-c2jp-5v3q
+  Severity: HIGH
+  Fix:      upgrade to 41.0.4 or later
+  Detail:   RSA key pair generation does not verify that p != q
+```
+
+#### What To Do When a Vulnerability Is Found
+
+| Step | Action |
+|------|--------|
+| 1 | Note the package name and the recommended fix version |
+| 2 | Upgrade: `pip install "cryptography>=41.0.4"` (or update `requirements.txt` / `pyproject.toml`) |
+| 3 | Run `pipewarden --only vulns` again to confirm the finding is gone |
+| 4 | If upgrading breaks your code, check the CVE detail — some findings are in code paths you do not use and can be accepted as low-risk with a documented decision |
+| 5 | To suppress a known false positive: `pip-audit --ignore-vuln GHSA-jfh8-c2jp-5v3q` (see pip-audit docs) |
+
+> Enable vuln scanning by adding `vulns = true` to your `.pipewarden.toml` under `[stages]`.
 
 ---
 
@@ -1458,6 +1511,155 @@ pipewarden --only dotnet --junit-out results.xml
 
 ---
 
+## 🌐 Node.js / Go / Rust — Quick Guides
+
+Pipewarden supports all three languages automatically. No config file needed — just run `pipewarden` in your project root.
+
+---
+
+### Node.js
+
+**Detected when:** `package.json` is present.
+
+**What runs:**
+
+| Step | Command used | Condition |
+|------|-------------|-----------|
+| Install deps | `npm ci` / `pnpm install --frozen-lockfile` / `yarn install --frozen-lockfile` | Picks the right tool from lockfile |
+| Lint | `npm run lint` | Only if `"lint"` script exists in `package.json` |
+| Type check | `npm run typecheck` | Only if `"typecheck"` script exists |
+| Test | `npm test` | Only if `"test"` script exists |
+| Build | `npm run build` | Only if `"build"` script exists |
+
+**Example output:**
+
+```console
+  Node
+✓ node:deps(npm)   (8.4s)
+✓ node:lint        (3.2s)
+✓ node:test       (12.1s)
+✓ node:build       (5.7s)
+```
+
+**Common config:**
+
+```toml
+# .pipewarden.toml
+[stages]
+node = true
+docker = false   # no Docker daemon in this CI
+```
+
+**Troubleshooting:**
+
+| Symptom | Fix |
+|---------|-----|
+| `node:lint` skipped | Add `"lint": "eslint ."` to `package.json` scripts |
+| `node:test` skipped | Add `"test": "jest"` (or vitest/mocha) to scripts |
+| `node:deps` fails — `npm ci` requires lockfile | Run `npm install` locally first to generate `package-lock.json` |
+| Slow install | Install pnpm (`npm i -g pnpm`) — Pipewarden picks it up automatically |
+
+---
+
+### Go
+
+**Detected when:** `go.mod` is present.
+
+**What runs:**
+
+| Step | Command |
+|------|---------|
+| Download modules | `go mod download` |
+| Vet | `go vet ./...` |
+| Build | `go build ./...` |
+| Test | `go test ./...` |
+
+**Example output:**
+
+```console
+  Go
+✓ go:deps    (4.2s)
+✓ go:vet     (0.8s)
+✓ go:build   (3.1s)
+✓ go:test    (7.4s)
+```
+
+**Troubleshooting:**
+
+| Symptom | Fix |
+|---------|-----|
+| `go:deps` fails — `GOPROXY` error | Set `GOPROXY=direct` or ensure network access to `proxy.golang.org` |
+| `go:test` times out | Increase `test_s` in `.pipewarden.toml` |
+| Build fails — Go version mismatch | The `go.mod` `go` directive controls version; upgrade with `go mod tidy` |
+
+---
+
+### Rust
+
+**Detected when:** `Cargo.toml` is present.
+
+**What runs:**
+
+| Step | Command |
+|------|---------|
+| Fetch crates | `cargo fetch` |
+| Lint (Clippy) | `cargo clippy -- -D warnings` |
+| Build | `cargo build` |
+| Test | `cargo test` |
+
+**Example output:**
+
+```console
+  Rust
+✓ rust:deps    (12.1s)
+✓ rust:lint     (8.4s)
+✓ rust:build   (22.3s)
+✓ rust:test     (6.7s)
+```
+
+**Troubleshooting:**
+
+| Symptom | Fix |
+|---------|-----|
+| `cargo clippy` fails with warnings | Fix the warnings; they are treated as errors (`-D warnings`) — this is intentional |
+| `rust:deps` times out on first run | Increase `install_s`; first-time Rust builds download many crates |
+| `rust:build` slow in CI | Consider `sccache` or `cargo-cache` to reuse the Cargo registry across runs |
+
+---
+
+### Polyglot Repos (Multiple Languages Together)
+
+If your project has `package.json` **and** `go.mod` **and** `Cargo.toml`, all three pipelines run automatically in a single `pipewarden` command. You do not need any configuration — Pipewarden detects and runs each one.
+
+```console
+  Secrets
+✓ secrets:fallback    (0.2s)
+
+  Node
+✓ node:deps(npm)     (8.4s)
+✓ node:build         (5.7s)
+
+  Go
+✓ go:deps            (4.2s)
+✓ go:build           (3.1s)
+✓ go:test            (7.4s)
+
+  Rust
+✓ rust:deps         (12.1s)
+✓ rust:build        (22.3s)
+✓ rust:test          (6.7s)
+```
+
+To run only one language in a polyglot repo:
+
+```bash
+pipewarden --only go
+pipewarden --only node
+pipewarden --only rust
+```
+
+---
+
 ## 🔐 Secret Scanning Deep Dive
 
 Secret scanning runs **first**, before any code is installed or built. If secrets are found, the pipeline stops.
@@ -1469,6 +1671,27 @@ gitleaks installed?
   YES → Use gitleaks (industry standard, kept up-to-date by security experts)
   NO  → Use built-in regex scanner (conservative, high-precision patterns)
 ```
+
+**Recommendation: install gitleaks for broader coverage.**
+
+The built-in scanner has 46 high-precision patterns. Gitleaks has 150+ patterns and is maintained by a dedicated security team. Install it once and Pipewarden picks it up automatically:
+
+```bash
+# macOS
+brew install gitleaks
+
+# Linux (download latest binary)
+curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz | tar -xz
+sudo mv gitleaks /usr/local/bin/
+
+# Windows (via winget)
+winget install gitleaks
+
+# Verify
+gitleaks version
+```
+
+Once installed, `pipewarden` will print `secrets:gitleaks` instead of `secrets:fallback` in the output — no config change needed.
 
 ### What the Built-in Scanner Detects
 
@@ -1602,6 +1825,24 @@ allowlist_strings = ["AKIAIOSFODNN7EXAMPLE"]
 
 > **`**` glob patterns work correctly.** `tests/fixtures/**` matches `tests/fixtures/api_keys.py`, `tests/fixtures/sub/data.json`, etc. This uses a full gitignore-compatible glob compiler — not plain `fnmatch`.
 
+### Understanding the Findings Output
+
+When a secret is found, the output looks like this:
+
+```
+  CRITICAL  src/config.py:14  [aws.access_key]  AKIA…WXYZ
+  │          │                  │                 │
+  │          │                  │                 └─ Truncated snippet — first 4 and last 4 chars
+  │          │                  │                    (never printed in full — safe to share in logs)
+  │          │                  └─ Rule ID that matched
+  │          └─ File path : line number
+  └─ Severity level
+```
+
+**The snippet is always truncated** — `AKIA…WXYZ` means the actual value starts with `AKIA` and ends with `WXYZ`. This is intentional: the finding is logged safely without exposing the full credential in CI logs.
+
+**What to do:** locate the file + line shown, look at the actual content in your editor to confirm it is real, then rotate it immediately (see next section).
+
 ### What Is NOT Scanned
 
 To keep scans fast and accurate, the following are automatically skipped:
@@ -1611,6 +1852,129 @@ To keep scans fast and accurate, the following are automatically skipped:
 - VCS directories (`.git/`, `.svn/`)
 - Cache directories (`__pycache__/`, `.mypy_cache/`, `.ruff_cache/`)
 - Files larger than 1 MB (configurable)
+
+---
+
+## 🚨 What To Do When Secrets Are Found
+
+Pipewarden exits with code `4` when secrets are detected. Here is exactly what to do.
+
+### Step 1 — Do NOT push
+
+If you found the secret **before pushing**, the credential is still local. Do not push until after you have removed it.
+
+If you already pushed, assume the credential is **compromised** — it may have been scraped by bots within minutes of appearing on GitHub. Proceed to Step 2 immediately.
+
+### Step 2 — Rotate the credential NOW
+
+Go to the service dashboard and revoke the exposed key. Rotation guides for common credentials:
+
+| Rule ID | Where to rotate |
+|---------|----------------|
+| `aws.access_key` / `aws.secret_key` | AWS Console → IAM → Users → Security credentials → Deactivate + delete |
+| `github.pat_classic` / `github.pat_fine_grained` | GitHub → Settings → Developer settings → Personal access tokens → Delete |
+| `github.actions_token` / `github.user_token` | GitHub → Settings → Developer settings → Delete and regenerate |
+| `openai.api_key` / `openai.api_key_project` | OpenAI → platform.openai.com → API keys → Delete |
+| `anthropic.api_key` | Anthropic → console.anthropic.com → API keys → Delete |
+| `stripe.live_key` / `stripe.restricted` | Stripe → Dashboard → Developers → API keys → Roll key |
+| `mongodb.connection_string` | Change the database user password via your cloud provider |
+| `postgres.connection_string` | `ALTER USER username WITH PASSWORD 'new-password';` |
+| `azure.storage_connection_string` | Azure Portal → Storage Account → Access keys → Rotate |
+| `azure.cosmos_connection_string` | Azure Portal → Cosmos DB → Keys → Regenerate |
+| `slack.token` | Slack API → Your Apps → OAuth & Permissions → Revoke |
+| `sendgrid.api_key` | SendGrid → Settings → API Keys → Delete |
+| `shopify.access_token` | Shopify Partners → Apps → Regenerate credentials |
+| `huggingface.token` | HuggingFace → Settings → Access Tokens → Delete |
+| `digitalocean.token` | DigitalOcean → API → Personal access tokens → Delete |
+
+**Do not just delete the file** — the credential is still in git history. See Step 4.
+
+### Step 3 — Remove the Secret From Your Code
+
+Replace the hardcoded value with an environment variable:
+
+```python
+# Before (dangerous)
+db_password = "Secr3t!"
+
+# After (safe)
+import os
+db_password = os.environ["DB_PASSWORD"]
+```
+
+Or use a secrets manager:
+
+```python
+# AWS Secrets Manager, Azure Key Vault, HashiCorp Vault, etc.
+db_password = get_secret("prod/db/password")
+```
+
+### Step 4 — Clean Git History
+
+If the secret was ever committed (even if since deleted from the file), it is still in git history. Remove it:
+
+```bash
+# Option A — rewrite history (if not yet pushed, or you can force-push)
+git filter-repo --path src/config.py --invert-paths   # removes the file entirely
+# OR to scrub a specific string:
+git filter-repo --replace-text <(echo 'ACTUAL_SECRET==>REMOVED')
+
+# Option B — for small teams with simple history
+pip install git-filter-repo
+git filter-repo --string-callback 'return line.replace(b"ACTUAL_SECRET", b"REMOVED")'
+```
+
+> If the commit was pushed to GitHub, contact GitHub Support to purge the cached versions from their servers after you've rewritten history.
+
+### Step 5 — Add to Allowlist (if it was a false positive)
+
+If the "secret" was actually a test fixture or documentation example:
+
+```toml
+# .pipewarden.toml
+[secrets]
+# Allowlist the specific file
+allowlist_paths = ["tests/fixtures/**"]
+
+# OR allowlist the specific known-safe string
+allowlist_strings = ["AKIAIOSFODNN7EXAMPLE"]
+
+# OR disable the rule entirely (use sparingly)
+allowlist_rules = ["jwt"]
+```
+
+### Step 6 — Verify the Fix
+
+```bash
+pipewarden --only secrets
+# Should print: scanned N files, no secrets
+# Exit code should be 0
+```
+
+### Setting Up Alerts for Exit Code 4
+
+In CI, you can trigger a special alert when exit code `4` is returned (secrets found):
+
+```bash
+# Bash / GitHub Actions
+pipewarden --sarif-out report.sarif
+if [ $? -eq 4 ]; then
+  echo "::error::CREDENTIAL LEAK DETECTED — rotate immediately"
+  # Send Slack/PagerDuty alert here
+fi
+```
+
+```yaml
+# GitHub Actions — separate step that only runs on secrets failure
+- name: Run Pipewarden
+  id: pipewarden
+  run: pipewarden --sarif-out report.sarif
+  continue-on-error: true
+
+- name: Alert on credential leak
+  if: steps.pipewarden.outcome == 'failure'
+  run: echo "Check SARIF report for leaked credentials"
+```
 
 ---
 
@@ -1664,6 +2028,30 @@ FAILED tests/test_auth.py::test_logout - AssertionError: Expected 204, got 500
 ```
 
 You see exactly which tests failed and why, directly in the pipeline output.
+
+### Stage Failed — What To Do
+
+Use this table when you see a `✗` in the summary:
+
+| Stage / Step | What failed | Immediate action |
+|---|---|---|
+| `secrets:fallback` or `secrets:gitleaks` | A credential pattern was found in your files | **Exit code 4.** See [What To Do When Secrets Are Found](#-what-to-do-when-secrets-are-found). Rotate the credential NOW. |
+| `py:deps` / `node:deps` / `go:deps` / `rust:deps` / `dotnet:restore` | Dependency installation failed | Read the error tail — look for a missing package, bad credentials, or network timeout. Check your lockfile is committed. |
+| `py:lint(ruff)` | Python lint errors | Run `ruff check --fix .` to auto-fix many issues, then `ruff check .` to see what remains. |
+| `py:typecheck(mypy)` | Type errors | Read the error output — each line shows the file, line, and exactly what type mismatch was found. Fix the type annotations. |
+| `py:test(pytest)` | Test failures | Read the failure output — each `FAILED` line shows which test and why. Run `pytest -x` locally to stop at the first failure and debug interactively. |
+| `node:lint` | ESLint / prettier errors | Run `npm run lint -- --fix` to auto-fix, then re-run. |
+| `node:test` | JavaScript test failures | Run `npm test` locally to see the full output. Check which test function failed and why. |
+| `node:build` | Build compilation error | Run `npm run build` locally with `--verbose` to see the full webpack / tsc / vite output. |
+| `dotnet:build` | C# compilation error | The full compiler error (file, line, error code) is printed. Fix the type or namespace error shown. |
+| `dotnet:test` | .NET test failures | The failing test name and assertion mismatch is shown. Run `dotnet test --filter "TestName"` locally to isolate. |
+| `go:vet` | Go vet warnings | Fix the reported issue — `go vet` catches real bugs (unreachable code, format string mismatches, etc.). |
+| `go:test` | Go test failures | Run `go test ./... -v -run TestName` locally to debug. |
+| `rust:lint` (clippy) | Clippy warnings | Run `cargo clippy --fix` to auto-fix many lints. Remaining lints are shown with the fix suggestion inline. |
+| `rust:test` | Rust test failures | Run `cargo test -- --nocapture TestName` to see the full output with `println!` output visible. |
+| `docker:lint(hadolint)` | Dockerfile best-practice violation | The rule ID and explanation is printed (e.g. `DL3008: Pin versions in apt get install`). See hadolint.github.io for the fix. |
+| `docker:build` | Docker build error | The full `docker build` output is printed. Usually a missing file, bad base image, or failed `RUN` command. |
+| `vulns:pip-audit` / `vulns:npm-audit` etc. | Known CVE in a dependency | Upgrade the affected package to the version shown in the finding. See [vulnerability action guide](#what-to-do-when-a-vulnerability-is-found). |
 
 ### Exit Codes — The Contract With Your CI
 
