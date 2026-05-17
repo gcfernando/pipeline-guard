@@ -2321,7 +2321,7 @@ db_password = os.environ["DB_PASSWORD"]
 
 ```csharp
 // C# — Before (dangerous)
-var connStr = "Server=db;Password=Secr3t!";
+var connStr = "Server=db;Password=<YOUR-PASSWORD>";
 
 // C# — After (safe)
 var connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
