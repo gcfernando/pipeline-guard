@@ -10,7 +10,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 - **README factual errors corrected** — eight inaccuracies found by source-code audit: Rust commands now include `--all-targets`; step name corrected to `rust:lint(clippy)`; vulns stage shows exact flags (`pip-audit --strict`, `npm audit --audit-level=high --omit=dev`); gitleaks `--diff` fallback documented; Docker daemon absent behaviour distinguished (WARNED in CI, FAILED locally); Docker scan step absence when no scanner is on PATH clarified; `pipewarden.toml` (no dot) accepted as alternative config filename; mypy command corrected to `mypy .`.
 
-- **README self-scan false positive fixed** — the C# connection-string example `"Server=db;Password=Secr3t!"` matched the `mssql.connection_string` regex pattern, causing Pipewarden's own CI to exit 4. Changed the password value to `<YOUR-PASSWORD>` — the `<` character is excluded from the pattern's character class, preventing the match while keeping the example illustrative.
+- **README self-scan false positive fixed** — a C# connection-string example in the "dangerous pattern" section matched the `mssql.connection_string` regex, causing Pipewarden's own CI to exit 4. The password placeholder was changed to use angle-bracket syntax (`<YOUR-PASSWORD>`); the `<` character is excluded from the pattern's character class so the example no longer triggers the scanner.
 
 ---
 
