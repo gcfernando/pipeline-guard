@@ -21,6 +21,8 @@ mypy
 
 All three must pass before a PR is merged. CI enforces this. The suite currently has **160 tests** with ≥ 85 % branch coverage enforced by `pytest --cov --cov-fail-under=80`.
 
+The CI matrix tests against Python 3.10–3.13 and `"3.x"` (always the current latest release) on Linux, macOS, and Windows.
+
 ## Conventions
 
 - **No new runtime dependencies.** The single-binary-no-deps story is the product. If you really need a dep, open an issue first.
@@ -28,6 +30,7 @@ All three must pass before a PR is merged. CI enforces this. The suite currently
 - **Subprocess discipline.** Never call `subprocess` outside `runner.py`. Never use `shell=True`. Every command takes a timeout.
 - **Stable exit codes.** Don't change them without a major version bump. Current codes: 0 (ok), 1 (non-secrets failure), 2 (usage), 3 (config), 4 (secrets found), 130 (interrupted).
 - **Type hints everywhere.** `mypy --strict` must pass.
+- **Stage registry.** Every new top-level stage must be added to `ALL_STAGES` in `config.py` and wired into the `STAGES` dict in `stages.py`. Add the stage name to `--init` template in `cli.py`.
 
 ## Adding a New Secret Pattern
 
@@ -44,7 +47,17 @@ Each entry is a `(rule_id, Severity, compiled_regex)` tuple. Follow these guidel
    - `HIGH` — scoped tokens with meaningful access (Slack bots, payment webhooks, monitoring keys)
    - `MEDIUM` — lower-impact or test-only credentials (JWTs, Stripe test keys)
 6. **Documentation examples** — if you add examples to `README.md`, split any matching string across a backtick boundary (e.g. `` `scheme://` + credentials + `@host` ``) so the scanner's whitespace stop prevents a false positive during self-scan.
-7. **Update `CHANGELOG.md`** with the new rule ID and what it detects.
+7. **Update `CHANGELOG.md`** — add to the `[Unreleased]` section, with the rule ID and what it detects.
+
+## Adding a New Stage
+
+When adding a new top-level pipeline stage (e.g. a new language or cross-language check):
+
+1. **`src/pipewarden/config.py`** — add the stage name to `ALL_STAGES` and add a toggle to `StageToggles`.
+2. **`src/pipewarden/stages.py`** — implement `run_<stage>(root, detected, cfg, results)` and add it to the `STAGES` registry dict.
+3. **`src/pipewarden/cli.py`** — add the stage to the `--init` template (`_INIT_TEMPLATE`), `_cmd_list_stages`, and `_cmd_dry_run`.
+4. **Tests** — add tests to `tests/test_stages.py` and `tests/test_config.py`. Every new stage needs at least a "runs when detected" and "skipped when not detected" test.
+5. **Docs** — update `README.md` (stages diagram, CLI stage list, configuration reference) and add an entry to `CHANGELOG.md`.
 
 ## Releasing
 

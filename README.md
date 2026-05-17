@@ -11,7 +11,7 @@
 
 <br>
 
-[![Python](https://img.shields.io/badge/Python-3.10%20|%203.11%20|%203.12%20|%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-D22128?style=for-the-badge)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-160%20Passing-2EA44F?style=for-the-badge&logo=checkmarx&logoColor=white)](#)
 [![Coverage](https://img.shields.io/badge/Coverage-80%25%2B-2EA44F?style=for-the-badge)](#)
@@ -59,7 +59,7 @@ Pipewarden automatically figures out what kind of project you have and runs ever
 | 3 | [Who Should Use It?](#-who-should-use-it) |
 | 4 | [See It In Action](#-see-it-in-action) |
 | 5 | [Installation](#-installation) |
-| 6 | [How It Works — The 6 Stages](#-how-it-works--the-6-stages) |
+| 6 | [How It Works — The Pipeline Stages](#️-how-it-works--the-pipeline-stages) |
 | 7 | [Python Projects — Complete Guide](#-python-projects--complete-guide) |
 | 8 | [.NET Projects — Complete Guide](#-net-projects--complete-guide) |
 | 9 | [Node.js / Go / Rust — Quick Guides](#-nodejs--go--rust--quick-guides) |
@@ -161,7 +161,7 @@ Here is what a real run looks like on a Python + Node + Docker project:
 $ pipewarden
 
 ════════════════════════════════════════════════════════════════
-  Pipewarden 1.2.0
+  Pipewarden 1.3.0
 ════════════════════════════════════════════════════════════════
   root:     /home/alice/my-app
   config:   (defaults — no config file found)
@@ -252,13 +252,13 @@ Verify the installation:
 
 ```bash
 pipewarden --version
-# → pipewarden 1.2.0
+# → pipewarden 1.3.0
 ```
 
 ### Option 2 — Install from Source
 
 ```bash
-pip install git+https://github.com/gcfernando/pipewarden.git@v1.2.0
+pip install git+https://github.com/gcfernando/pipewarden.git@v1.3.0
 ```
 
 ### Option 3 — Docker
@@ -280,7 +280,7 @@ docker run --rm -v "$(pwd):/repo" ghcr.io/gcfernando/pipewarden:latest \
 
 ---
 
-## ⚙️ How It Works — The 6 Stages
+## ⚙️ How It Works — The Pipeline Stages
 
 Pipewarden always runs stages in this order. Each stage only runs if the relevant files are detected.
 
@@ -295,20 +295,33 @@ Pipewarden always runs stages in this order. Each stage only runs if the relevan
 │ Stage 2  │  SECRETS  (always first)                             │
 │          │  Scans every file for leaked credentials.            │
 │          │  Blocks the pipeline immediately if found.           │
+│          │  Optional: scan full git history with gitleaks.      │
 ├──────────┼──────────────────────────────────────────────────────┤
 │ Stage 3  │  INSTALL                                             │
 │          │  Creates isolated environments and installs          │
 │          │  all declared dependencies.                          │
 ├──────────┼──────────────────────────────────────────────────────┤
-│ Stage 4  │  LINT                                                │
+│ Stage 4  │  LINT / FORMAT                                       │
 │          │  Runs the appropriate linter for each language.      │
-│          │  Catches bugs, style issues, unused imports.         │
+│          │  .NET: also enforces code formatting via             │
+│          │  dotnet format --verify-no-changes.                  │
 ├──────────┼──────────────────────────────────────────────────────┤
 │ Stage 5  │  TEST                                                │
 │          │  Runs your test suite.                               │
 ├──────────┼──────────────────────────────────────────────────────┤
 │ Stage 6  │  BUILD                                               │
 │          │  Compiles or packages your application.              │
+│          │  Docker: image is also scanned with trivy/grype      │
+│          │  for known CVEs after a successful build.            │
+├──────────┼──────────────────────────────────────────────────────┤
+│ Stage 7  │  VULNS  (optional)                                   │
+│          │  Checks declared dependencies for known CVEs.        │
+│          │  pip-audit / npm audit / cargo-audit / govulncheck   │
+│          │  / dotnet list package --vulnerable                  │
+├──────────┼──────────────────────────────────────────────────────┤
+│ Stage 8  │  OUTDATED  (optional, non-blocking)                  │
+│          │  Reports newer versions available for all languages. │
+│          │  Never fails the pipeline — informational only.      │
 └──────────┴──────────────────────────────────────────────────────┘
 ```
 
@@ -318,10 +331,10 @@ Pipewarden always runs stages in this order. Each stage only runs if the relevan
 |--------------------------|-------------------|------------|
 | `pyproject.toml`, `requirements.txt`, `setup.py` | **Python** | venv + pip / poetry / uv → ruff → mypy → pytest |
 | `package.json` | **Node.js** | npm / pnpm / yarn → lint script → test script → build script |
-| `*.sln` or `*.csproj` | **.NET** | dotnet restore → dotnet build → dotnet test |
+| `*.sln` or `*.csproj` | **.NET** | dotnet restore → format → build → test → vuln scan (opt-in) |
 | `go.mod` | **Go** | go mod download → go vet → go build → go test |
 | `Cargo.toml` | **Rust** | cargo fetch → cargo clippy → cargo build → cargo test |
-| `Dockerfile` or `Containerfile` | **Docker** | hadolint (lint) → docker build |
+| `Dockerfile` or `Containerfile` | **Docker** | hadolint (lint) → docker build → container scan (trivy/grype, if installed) |
 
 > **Polyglot repos are fully supported.** A monorepo containing Python, Node, and Rust will run all three pipelines in a single `pipewarden` invocation.
 
@@ -355,8 +368,27 @@ When the `vulns` stage is enabled, Pipewarden runs dependency vulnerability scan
 | `npm audit` | Node | npm registry security advisories | built into npm |
 | `cargo-audit` | Rust | RustSec advisory database | `cargo install cargo-audit` |
 | `govulncheck` | Go | Go vulnerability database | `go install golang.org/x/vuln/cmd/govulncheck@latest` |
+| `dotnet list package --vulnerable` | .NET | NuGet packages against GitHub Advisory DB | built into .NET SDK |
 
 If none of these tools are installed, the stage is **skipped** — it never blocks your pipeline for a missing optional tool.
+
+### Container Image Vulnerability Scanning
+
+After a successful `docker build`, Pipewarden automatically scans the built image for OS-level and application-level CVEs if either `trivy` or `grype` is on the PATH:
+
+| Tool | Priority | What it scans | Install |
+|------|----------|---------------|---------|
+| `trivy` | First choice | OS packages + app deps in the image | `brew install aquasecurity/trivy/trivy` or [download binary](https://github.com/aquasecurity/trivy/releases) |
+| `grype` | Fallback | OS packages + app deps in the image | `brew install anchore/grype/grype` or [download binary](https://github.com/anchore/grype/releases) |
+
+Findings at `HIGH` or `CRITICAL` severity **fail the pipeline**. If neither tool is installed, the scan step is `WARNED` (non-blocking). No scan tool is ever required.
+
+```console
+  Docker
+✓ docker:lint(hadolint)     (0.2s)
+✓ docker:build              (22.1s)
+✓ docker:scan(trivy)         (8.4s)   ← only runs if trivy or grype is installed
+```
 
 #### What a Vulnerability Finding Looks Like
 
@@ -422,7 +454,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.x"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -1116,7 +1148,34 @@ Downloads all NuGet packages declared in every project in the solution.
 - A private feed credential is missing or expired
 - The solution references a project that doesn't exist on disk
 
-#### Step 3 — dotnet build
+#### Step 3 — dotnet format (code style check)
+
+```bash
+dotnet format --verify-no-changes
+```
+
+Checks that all C# / F# / VB files comply with the project's `.editorconfig` and code style rules **without modifying any files**. The step fails if any file would be changed — exactly like running `ruff check .` for Python.
+
+Controlled by `[dotnet] format = true` in `.pipewarden.toml` (default: **on**).
+
+```console
+✓ dotnet:format (1.2s)    ← All files are correctly formatted
+✗ dotnet:format (0.8s)    ← Formatting violations found — run `dotnet format` locally to fix
+```
+
+**To fix locally:**
+```bash
+dotnet format    # rewrites files in place
+```
+
+**To disable** (e.g. for legacy projects not yet on .editorconfig):
+```toml
+# .pipewarden.toml
+[dotnet]
+format = false
+```
+
+#### Step 4 — dotnet build
 
 ```bash
 dotnet build --no-restore --nologo
@@ -1148,7 +1207,7 @@ Build FAILED.
   Warnings: 3
 ```
 
-#### Step 4 — dotnet test
+#### Step 5 — dotnet test
 
 ```bash
 dotnet test --no-build --nologo
@@ -1156,7 +1215,7 @@ dotnet test --no-build --nologo
 
 Runs every test project found in the solution.
 
-- `--no-build` — skips compilation (already done in step 3; without this it would rebuild)
+- `--no-build` — skips compilation (already done in step 4; without this it would rebuild)
 - `--nologo` — cleaner output
 
 ```console
@@ -1184,6 +1243,49 @@ Failed!  - Failed:     1, Passed:    47, Skipped:     0, Total:    48, Duration:
 - `MSTest.TestFramework` or `MSTest.TestAdapter`
 
 Or any project with `<IsTestProject>true</IsTestProject>` in its `.csproj`.
+
+#### Step 6 — Vulnerability Scan (opt-in, default: on)
+
+```bash
+dotnet list package --vulnerable --include-transitive
+```
+
+Checks every NuGet package in the solution against the **GitHub Advisory Database** for known CVEs. The `--include-transitive` flag catches vulnerabilities in indirect dependencies — packages your packages depend on.
+
+Controlled by `[dotnet] vulns = true` in `.pipewarden.toml` (default: **on**).
+
+```console
+✓ dotnet:vulns (4.1s)    ← No vulnerable packages found
+✗ dotnet:vulns (3.8s)    ← CVEs found — package name, version, severity, and advisory ID printed
+```
+
+**To disable:**
+```toml
+# .pipewarden.toml
+[dotnet]
+vulns = false
+```
+
+#### Step 7 — Outdated Packages (opt-in, default: off, non-blocking)
+
+```bash
+dotnet list package --outdated
+```
+
+Lists every NuGet package that has a newer version available. This step is **always** `WARNED` — it never fails the pipeline. It is informational only: a reminder to upgrade, not a blocker.
+
+Controlled by `[dotnet] outdated = true` in `.pipewarden.toml` (default: **off**).
+
+```console
+⚠ dotnet:outdated (5.2s)    ← Newer versions available for 3 packages (see output below)
+```
+
+**To enable:**
+```toml
+# .pipewarden.toml
+[dotnet]
+outdated = true
+```
 
 ---
 
@@ -1219,8 +1321,10 @@ MyApp/
 
   .Net
 ✓ dotnet:restore    (12.4s)   ← All 5 projects restored
+✓ dotnet:format      (1.2s)   ← All files correctly formatted
 ✓ dotnet:build      (18.7s)   ← All 5 projects compiled
 ✓ dotnet:test        (8.3s)   ← Both test projects run (48 tests total)
+✓ dotnet:vulns       (4.1s)   ← No vulnerable NuGet packages
 ```
 
 #### Layout B — Single Project (no solution file)
@@ -1238,8 +1342,10 @@ MyLibrary/
 ```console
   .Net
 ✓ dotnet:restore  (4.1s)
+✓ dotnet:format   (0.9s)
 ✓ dotnet:build    (6.2s)
 ✓ dotnet:test     (2.1s)
+✓ dotnet:vulns    (2.8s)
 ```
 
 #### Layout C — ASP.NET Core API + Dockerfile (polyglot)
@@ -1263,15 +1369,18 @@ MyWebApi/
 
   .Net
 ✓ dotnet:restore        (10.2s)
+✓ dotnet:format          (1.1s)
 ✓ dotnet:build          (15.4s)
 ✓ dotnet:test            (5.2s)
+✓ dotnet:vulns           (3.9s)
 
   Docker
 ✓ docker:lint(hadolint)  (0.3s)
 ✓ docker:build          (45.2s)
+✓ docker:scan(trivy)     (8.1s)   ← container image CVE scan
 ```
 
-Secret scanning, .NET pipeline, and Docker build — all from one command.
+Secret scanning, .NET pipeline, Docker build, and container image scan — all from one command.
 
 #### Layout D — Console Application (no test project)
 
@@ -1355,6 +1464,24 @@ pipewarden --only dotnet
 pipewarden --only secrets --only dotnet
 ```
 
+#### Fine-tune the .NET pipeline steps
+
+```toml
+# .pipewarden.toml
+[dotnet]
+# dotnet format --verify-no-changes (code style enforcement)
+# Set to false for legacy codebases without .editorconfig
+format = true
+
+# dotnet list package --vulnerable --include-transitive
+# Checks NuGet packages against GitHub Advisory DB
+vulns = true
+
+# dotnet list package --outdated (non-blocking, informational only)
+# Set to true to see which packages have newer versions available
+outdated = false
+```
+
 #### Full config for a .NET microservice
 
 ```toml
@@ -1364,11 +1491,16 @@ fail_fast = false
 [stages]
 dotnet = true
 docker = true
-vulns  = false    # no .NET vuln scanner configured yet
+vulns  = true     # enables pip-audit / npm audit / dotnet vulns / etc.
 python = false
 node   = false
 go     = false
 rust   = false
+
+[dotnet]
+format   = true    # enforce code formatting
+vulns    = true    # scan NuGet packages for CVEs
+outdated = true    # report available upgrades (non-blocking)
 
 [timeouts]
 install_s = 600
@@ -1692,6 +1824,30 @@ gitleaks version
 ```
 
 Once installed, `pipewarden` will print `secrets:gitleaks` instead of `secrets:fallback` in the output — no config change needed.
+
+### Scanning Full Git History (Audit Mode)
+
+By default, Pipewarden scans only the **working tree** — files on disk right now. For a thorough audit (e.g. before open-sourcing a private repo), you can tell Pipewarden to scan the **entire git history**:
+
+```toml
+# .pipewarden.toml
+[secrets]
+scan_history = true    # uses gitleaks detect over full git history; requires gitleaks
+```
+
+Or from the CLI:
+```bash
+pipewarden --only secrets   # while scan_history = true in config
+```
+
+> **Requires gitleaks.** History scanning uses `gitleaks detect` without `--source` — it reads the git log directly. The built-in regex fallback does not support history mode.
+>
+> **Slower.** On large repositories with thousands of commits, this can take several minutes. Use it for one-time audits, not on every commit.
+
+```console
+✓ secrets:gitleaks(history) (34.2s)   ← scanned full git history, no secrets
+✗ secrets:gitleaks(history)  (8.1s)   ← credential found in commit abc1234 — rotate it
+```
 
 ### What the Built-in Scanner Detects
 
@@ -2043,8 +2199,11 @@ Use this table when you see a `✗` in the summary:
 | `node:lint` | ESLint / prettier errors | Run `npm run lint -- --fix` to auto-fix, then re-run. |
 | `node:test` | JavaScript test failures | Run `npm test` locally to see the full output. Check which test function failed and why. |
 | `node:build` | Build compilation error | Run `npm run build` locally with `--verbose` to see the full webpack / tsc / vite output. |
+| `dotnet:format` | Code formatting violations | Run `dotnet format` locally to rewrite files. Check in the formatted files, then re-run. |
 | `dotnet:build` | C# compilation error | The full compiler error (file, line, error code) is printed. Fix the type or namespace error shown. |
 | `dotnet:test` | .NET test failures | The failing test name and assertion mismatch is shown. Run `dotnet test --filter "TestName"` locally to isolate. |
+| `dotnet:vulns` | Vulnerable NuGet package | Upgrade the affected package to the version shown. Check for breaking changes in the NuGet release notes. |
+| `docker:scan(trivy)` or `docker:scan(grype)` | Container image CVE | Upgrade the base image or the affected OS/app package. Use `trivy image --severity HIGH,CRITICAL <tag>` locally for details. |
 | `go:vet` | Go vet warnings | Fix the reported issue — `go vet` catches real bugs (unreachable code, format string mismatches, etc.). |
 | `go:test` | Go test failures | Run `go test ./... -v -run TestName` locally to debug. |
 | `rust:lint` (clippy) | Clippy warnings | Run `cargo clippy --fix` to auto-fix many lints. Remaining lints are shown with the fix suggestion inline. |
@@ -2247,13 +2406,14 @@ skip = []
 # Turn individual language stages on or off permanently.
 # ─────────────────────────────────────────────────────────────────────────────
 [stages]
-python = true
-node   = true
-dotnet = true
-go     = true
-rust   = true
-docker = true   # Set to false if you have no Docker daemon in your CI
-vulns  = true   # Dependency vulnerability scanning (optional tools)
+python   = true
+node     = true
+dotnet   = true
+go       = true
+rust     = true
+docker   = true    # Set to false if you have no Docker daemon in your CI
+vulns    = true    # Dependency vulnerability scanning (optional tools)
+outdated = false   # Cross-language outdated package check (non-blocking — never fails pipeline)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2273,10 +2433,11 @@ default_s = 600    # 10 min — everything else
 # SECRET SCANNING
 # ─────────────────────────────────────────────────────────────────────────────
 [secrets]
-enabled         = true   # Set to false to skip secret scanning entirely
-prefer_external = true   # Use gitleaks if installed (recommended)
-max_file_bytes  = 1000000  # Skip files larger than this (1 MB)
-max_files       = 10000    # Stop after scanning this many files
+enabled         = true    # Set to false to skip secret scanning entirely
+prefer_external = true    # Use gitleaks if installed (recommended)
+max_file_bytes  = 1000000 # Skip files larger than this (1 MB)
+max_files       = 10000   # Stop after scanning this many files
+scan_history    = false   # Scan full git history with gitleaks (slower, for audits)
 
 # Skip these paths (fnmatch glob patterns, relative to repo root)
 allowlist_paths = [
@@ -2293,6 +2454,25 @@ allowlist_rules = [
 allowlist_strings = [
     # "AKIAIOSFODNN7EXAMPLE",   # AWS docs dummy key
 ]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# .NET PIPELINE CONTROL
+# Fine-grained control over which steps run inside the dotnet stage.
+# These are separate from [stages].dotnet — they control steps WITHIN the stage.
+# ─────────────────────────────────────────────────────────────────────────────
+[dotnet]
+# dotnet format --verify-no-changes: fail if any file needs reformatting.
+# Set to false for legacy projects without .editorconfig.
+format = true
+
+# dotnet list package --vulnerable --include-transitive:
+# check NuGet packages against the GitHub Advisory Database.
+vulns = true
+
+# dotnet list package --outdated: report available upgrades.
+# Never fails the pipeline (always WARNED). Set to true to see upgrade hints.
+outdated = false
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2544,7 +2724,7 @@ Catch issues **before** code even reaches the remote repository by wiring Pipewa
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/gcfernando/pipewarden
-    rev: v1.2.0
+    rev: v1.3.0
     hooks:
       - id: pipewarden-secrets     # Runs on every git commit
       - id: pipewarden-diff        # Runs on every git push (changed files only)
@@ -2634,14 +2814,15 @@ OPTIONS
 ### Available Stages
 
 ```
-secrets    Secret scanning (always runs first)
-python     Python: venv + install + lint + typecheck + test
+secrets    Secret scanning (always runs first); full git history scan available via scan_history
+vulns      Dependency CVE scan (pip-audit / npm audit / cargo-audit / govulncheck / dotnet list --vulnerable)
+outdated   Cross-language outdated package check — non-blocking, informational only
+python     Python: venv + install + lint(ruff) + typecheck(mypy) + test(pytest)
 node       Node.js: install + lint + typecheck + test + build
-dotnet     .NET: restore + build + test
+dotnet     .NET: restore + format + build + test + vuln scan (steps controlled by [dotnet] config)
 go         Go: mod download + vet + build + test
 rust       Rust: fetch + clippy + build + test
-docker     Docker: hadolint lint + docker build
-vulns      Dependency vulnerability scanning (pip-audit / npm audit / cargo-audit / govulncheck)
+docker     Docker: hadolint lint + docker build + container scan (trivy/grype, if installed)
 ```
 
 ### Common Usage Patterns
@@ -2805,6 +2986,11 @@ A: Yes. The tool makes zero network calls at runtime. It only runs local command
 
 **Q: I'm getting `command not found: ruff`. Is that an error?**
 A: No. If `ruff` is not on your PATH, the lint step is recorded as `warned` (not failed) and the pipeline continues. Install ruff (`pip install ruff`) to enable linting.
+
+---
+
+**Q: What is the `outdated` stage and how is it different from `vulns`?**
+A: The `vulns` stage checks for **known security vulnerabilities** (CVEs) in your current dependencies. The `outdated` stage checks for **newer versions available** regardless of whether they fix a security issue. Outdated results are always `WARNED` — they never fail the pipeline. Enable them with `outdated = true` in `[stages]`.
 
 ---
 

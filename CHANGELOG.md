@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-05-17
+
+### Added
+
+- **`dotnet format` step** — `dotnet format --verify-no-changes` now runs between `dotnet restore` and `dotnet build` for all .NET projects, enforcing code style compliance. The step fails if any file needs reformatting. Controlled by `[dotnet] format = true` (default: on). Disable for legacy codebases via `format = false`.
+
+- **`.NET NuGet vulnerability scanning** — `dotnet list package --vulnerable --include-transitive` runs after `dotnet test` and checks all direct and transitive NuGet packages against the GitHub Advisory Database. Controlled by `[dotnet] vulns = true` (default: on).
+
+- **`.NET outdated package reporting** — `dotnet list package --outdated` is available as an opt-in non-blocking step. Reports available NuGet upgrades; always `WARNED`, never fails the pipeline. Controlled by `[dotnet] outdated = false` (default: off).
+
+- **`[dotnet]` config section** — New TOML section providing fine-grained control over the .NET pipeline steps:
+  ```toml
+  [dotnet]
+  format   = true    # dotnet format --verify-no-changes
+  vulns    = true    # dotnet list package --vulnerable --include-transitive
+  outdated = false   # dotnet list package --outdated (non-blocking, opt-in)
+  ```
+
+- **Container image scanning** — After a successful `docker build`, Pipewarden automatically scans the built image with `trivy` (preferred) or `grype` (fallback) if either is on the PATH. High and Critical CVEs fail the pipeline. Neither tool installed → `WARNED` (non-blocking). Step name: `docker:scan(trivy)` or `docker:scan(grype)`.
+
+- **Cross-language `outdated` stage** — New top-level `outdated` stage runs best-effort outdated-package checks across all detected languages in one pass:
+  - Python — `pip list --outdated` inside `.pipewarden-venv` (skipped if no venv)
+  - Node — `npm outdated`
+  - Go — `go list -m -u all`
+  - Rust — `cargo outdated` (requires `cargo-outdated` on PATH; skipped if absent)
+  - All findings are `WARNED` — the stage never fails the pipeline.
+
+  Enable with `outdated = true` in `[stages]`.
+
+- **Git history secret scanning** — New `scan_history = true` option in `[secrets]` causes the secrets stage to run `gitleaks detect` over the full git history rather than the working tree. Useful for auditing repositories before open-sourcing. Requires gitleaks; the built-in fallback does not support history mode.
+
+### Changed
+
+- Docker base image switched from `python:3.12-slim` to `python:3.12-alpine` — eliminates 2 high CVEs present in the Debian-based slim image, reduces attack surface.
+
+- CI matrix now uses `"3.x"` as a forward-compatible Python sentinel (`actions/setup-python` resolves this to the current latest stable release at run time). Future Python versions (3.15, 3.16, …) are automatically tested with zero config changes. Pinned versions (3.10–3.13) remain in the matrix to preserve backward-compatibility testing.
+
+- Coverage upload condition in `quality-gate.yml` changed from `matrix.python == '3.12'` to `matrix.python == '3.x'` — always uploads on the newest Python without needing future config updates.
+
+- Test suite expanded to **160 tests**; branch coverage ≥ 85%.
+
 ## [1.2.0] — 2026-05-17
 
 ### Added
@@ -66,5 +107,5 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - `--version`, `--json`, `--only`, `--skip`, `--fail-fast`, `--log-file`, `--no-color`
 - Subprocess timeouts on every command
 - `python -m pipewarden` entry point
-- 50+ tests; CI matrix across Linux/macOS/Windows and Python 3.10–3.13
+- 50+ tests; CI matrix across Linux/macOS/Windows and Python 3.10+ (auto-forward-compatible via `"3.x"`)
 - Signed releases via Sigstore (PyPI Trusted Publisher)

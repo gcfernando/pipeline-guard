@@ -23,7 +23,7 @@ build-backend = "hatchling.build"
 # =============================================================================
 [project]
 name        = "pipewarden"
-version     = "1.2.0"
+version     = "1.3.0"
 description = "Pipewarden — detect, install, lint, test, build, scan — locally or in CI. Free and open."
 readme      = "README.md"
 license     = { file = "LICENSE" }
@@ -47,7 +47,14 @@ keywords = [
 ]
 
 # PyPI classifiers control which filters and badges appear on the project page.
-# Keep these in sync with requires-python and the supported OS list above.
+#
+# CI strategy vs. classifier strategy:
+#   The quality-gate workflow uses "3.x" in its matrix so new Python releases
+#   are tested automatically without any config change.
+#   These classifiers are PyPI metadata — they are updated manually once per
+#   release when a new Python version has been validated in CI. Add a new
+#   "Programming Language :: Python :: 3.x" line here as part of the release
+#   checklist whenever a new minor version is added.
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -60,6 +67,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    # Add new versions here once CI validates them (CI picks them up automatically via "3.x")
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Testing",
     "Topic :: Security",

@@ -18,13 +18,14 @@ only = []
 skip = []
 
 [stages]
-python = true
-node   = true
-dotnet = true
-go     = true
-rust   = true
-docker = true
-vulns  = true
+python   = true
+node     = true
+dotnet   = true
+go       = true
+rust     = true
+docker   = true
+vulns    = true
+outdated = false   # cross-language outdated check (non-blocking — always WARNED)
 
 [timeouts]
 # Seconds. Every subprocess uses one of these.
@@ -39,6 +40,7 @@ enabled         = true
 prefer_external = true   # use gitleaks if installed; fall back to built-in scanner
 max_file_bytes  = 1_000_000
 max_files       = 10_000
+scan_history    = false  # scan full git history via gitleaks (slower; for audits)
 
 # Gitignore-style globs, relative to repo root. ** is fully supported.
 allowlist_paths = [
@@ -55,6 +57,13 @@ allowlist_rules = [
 allowlist_strings = [
     # "AKIAIOSFODNN7EXAMPLE",
 ]
+
+# Fine-grained control over which steps run inside the dotnet stage.
+# These are independent of [stages].dotnet — they control steps within the stage.
+[dotnet]
+format   = true    # dotnet format --verify-no-changes (code style enforcement)
+vulns    = true    # dotnet list package --vulnerable --include-transitive
+outdated = false   # dotnet list package --outdated (non-blocking, opt-in)
 
 [retry]
 # Retry network-heavy steps (pip install, npm ci, cargo fetch, etc.)
@@ -92,3 +101,36 @@ Priority: **CLI flags > env vars > `.pipewarden.toml` > built-in defaults**.
 | `PIPEWARDEN_QUIET` | `1`/`true` | `output.quiet = true` |
 | `PIPEWARDEN_RETRY_ATTEMPTS` | integer 0–5 | `retry.attempts` |
 | `PIPEWARDEN_RETRY_BACKOFF` | float | `retry.backoff_base` |
+
+---
+
+## New Config Options (Unreleased)
+
+### `[stages].outdated`
+
+```toml
+[stages]
+outdated = false   # default off; set to true to enable
+```
+
+Enables the cross-language outdated stage. Checks Python, Node, Go, and Rust for newer package versions. All findings are `WARNED` — never fails the pipeline.
+
+### `[secrets].scan_history`
+
+```toml
+[secrets]
+scan_history = false   # default off; requires gitleaks
+```
+
+When `true`, Pipewarden runs `gitleaks detect` over the full git history instead of the working tree. Use for one-time audits of repositories before open-sourcing.
+
+### `[dotnet]` section
+
+```toml
+[dotnet]
+format   = true    # dotnet format --verify-no-changes (default on)
+vulns    = true    # dotnet list package --vulnerable (default on)
+outdated = false   # dotnet list package --outdated (default off, non-blocking)
+```
+
+Controls the individual steps run inside the `.NET` stage. `format` and `vulns` are on by default. `outdated` is opt-in.
